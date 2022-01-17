@@ -1,0 +1,42 @@
+{
+  "name": "corestockservices",
+  "version": "1.0.0",
+  "description": "",
+  "main": "runstockserver.js",
+  "scripts": {
+    "server": "nodemon index.js",
+    "serverprod": "pm2-runtime start runstockserver.js -i max",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm run server",
+    "prod": "npm run serverprod",
+    "start": "pm2 start runstockserver.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-sse": "^0.5.3",
+    "express-sse-middleware": "^3.0.3",
+    "moment": "^2.29.1",
+    "mongoose": "^5.12.0",
+    "mysql2": "^2.2.5",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^2.6.1",
+    "redis": "^3.1.2",
+    "rss-parser": "^3.12.0",
+    "sequelize": "^6.4.0",
+    "spdy": "^4.0.2",
+    "stock-info": "^1.2.0",
+    "yahoo-finance": "^0.3.6"
+  },
+  "devDependencies": {
+    "concurrently": "^5.0.2",
+    "eslint": "^8.1.0",
+    "nodemon": "^2.0.13"
+  }
+}

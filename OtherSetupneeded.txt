@@ -1,0 +1,21 @@
+Docker specs -
+docker build . -t corestockservices:1.0
+docker run -e NODE_ENV=prod  -p 8888:5100 corestockservices:1.0
+
+Push Docker image to gcloud.
+docker push [HOSTNAME]/[PROJECT-ID]/[IMAGE]
+Have to use the secret to auth the machine to be able to docker push...
+docker tag corestockservices:1.0 us.gcr.io/concise-rope-275301/corestockservices:1.0
+docker push us.gcr.io/concise-rope-275301/corestockservices:1.0
+
+Sequilize set-up.
+#Install below to autogenerate the models and move the files to models folder.
+npm install -g sequelize-auto
+sequelize-auto -h localhost -d STOCK_DB -u root -x <pwd> --dialect mysql
+
+curl -X POST  -H "Content-Type: application/json" -d '{"username":"xyz","password":"xyz"}'  http://0.0.0.0:5000/api/positions/ABT
+
+NODE_ENV=dev npm run dev
+
+Kubernetes
+Workload name - corestockservices

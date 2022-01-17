@@ -1,0 +1,249 @@
+const DBConfig = require("../config/db.config.js");
+const { Op } = require("sequelize");
+const conf = new DBConfig()
+
+const Sequelize = require("sequelize");
+const sequelize = new Sequelize(conf.DB, conf.USER, conf.PASSWORD, {
+    host: conf.HOST,
+    dialect: conf.dialect
+  })
+
+const getStockLists = async () => {
+    console.log('i n h e r e ---- getStockLists')
+    let dbresponse = ''
+    let arrstocklist = []
+    try {
+        let myCache = require('../servercache/cacheitems')
+        arrstocklist = myCache.getCache("STOCK_HOME_PAGE")
+        console.log("myCache.getStats",myCache.getCacheStats(),arrstocklist)
+        if (arrstocklist === undefined){
+          arrstocklist = [];
+          var initModels = require("../models/init-models"); 
+          var models = initModels(sequelize);
+          var stocklist = models.stocklist
+
+          await stocklist.findAll({where: {
+            track: {
+              [Op.eq] : 1
+            }
+          }}).then(data => dbresponse=data) 
+
+          for (let i=0;i<dbresponse.length;i++){
+            const stockobj = {}
+            stockobj.symbol = dbresponse[i].symbol
+            let retfromextsite = await getperchange(dbresponse[i].symbol)
+            stockobj.perchange = retfromextsite.perchange
+            stockobj.close = retfromextsite.latestprice
+            stockobj.avgdayvol3mon = retfromextsite.avgdayvol3mon
+            stockobj.avgdayvol10day = retfromextsite.avgdayvol10day
+            stockobj.volume = retfromextsite.volume
+            stockobj.itemKey = dbresponse[i].symbol
+            stockobj.key = dbresponse[i].symbol
+            arrstocklist.push(stockobj)
+          }
+          arrstocklist.sort((a, b) => Math.abs(b.perchange) - Math.abs(a.perchange))
+            if (arrstocklist !== []){
+                let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE",arrstocklist,120)
+                console.log("Cache was set in function getStockLists...",cacheset)
+            }    
+        }
+      }catch (error) {
+        console.error('Error in getStockLists function:', error);
+    }
+    return arrstocklist
+}
+
+//regularMarketChange: -2.3899994,
+//regularMarketChangePercent: -2.0655081,
+//regularMarketTime: 1613666348,
+//regularMarketPrice: 113.32,
+//regularMarketDayHigh: 115.63,
+//regularMarketDayRange: '112.44 - 115.63',
+//regularMarketDayLow: 112.44,
+//regularMarketVolume: 2706938,
+//regularMarketPreviousClose: 115.71,
+//bid: 113.55,
+//ask: 113.62,
+
+const getperchange = async (stksym) => {
+  let perchange = 0
+  let latestprice = 0
+  let stockdtls = {}
+  const stkInfo = require('stock-info');
+  await stkInfo.getSingleStockInfo(stksym).then(retData => {stockdtls.perchange = parseFloat(retData.regularMarketChangePercent)
+            ,stockdtls.latestprice=parseFloat(retData.regularMarketPrice),
+            stockdtls.avgdayvol3mon = parseFloat(retData.averageDailyVolume3Month),
+            stockdtls.avgdayvol10day = parseFloat(retData.averageDailyVolume10Day),
+            stockdtls.volume = parseFloat(retData.regularMarketVolume)});
+  return stockdtls 
+}
+
+const getstockquotes = async (stksym) => {
+  let stockdtls = {}
+  const stkInfo = require('stock-info');
+  await stkInfo.getStocksInfo(stksym).then(retData => stockdtls = retData);
+  console.log(typeof(stockdtls[0]))
+  return formatResp(stockdtls)
+}
+
+const formatResp = (respfromext) =>{
+  let retvals = []
+  for (var i = 0; i < respfromext.length; i++) { 
+    let objval = {}
+    //console.log(respfromext[i])
+    objval["symbol"] = respfromext[i].symbol
+    objval["close"] = respfromext[i].regularMarketPrice
+    objval["high"] = respfromext[i].regularMarketDayHigh
+    objval["low"] = respfromext[i].regularMarketDayLow
+    objval["open"] = respfromext[i].regularMarketOpen
+    objval["volume"] = respfromext[i].regularMarketVolume
+    objval["perchange"] = respfromext[i].regularMarketChangePercent
+    retvals.push(objval)
+  }
+  return retvals
+}
+
+const getStockHistData = async (stksym) => {
+  
+  let response
+  let enddt = new Date()
+  let dow = enddt.getDay()
+
+  if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5){
+    enddt.setDate(enddt.getDate() - 1)
+  }
+  const yahooFinance = require('yahoo-finance');     
+  await yahooFinance.historical({
+    symbol: stksym,
+    from: '2009-01-01',
+    to: enddt,
+    period: 'd'
+
+  }).then(result => response=result)
+
+  if (response.length > 0){
+    try{
+      await insertintostkprcday(response)
+      await checkandinsertstklist(stksym)  
+    }catch (error) {
+      console.log("getStockHistData - Error when updating DB from Yahoo",error,response,stksym)
+      return false
+    }
+  }
+  return response
+}
+
+const insertintostkprcday = async (arrofprices) => {
+
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stockpriceday = models.stockpriceday
+
+  let transformedarr = arrofprices.map(item => ({'symbol':item.symbol,'date':item.date,'Open':item.open,
+                        'high':item.high,'low':item.low,'close':item.close,'adjclose':item.adjClose,'volume':item.volume}))
+
+  await stockpriceday.bulkCreate(transformedarr, {
+        updateOnDuplicate: ["close"] 
+  })
+  await flushAllCache()
+}
+
+ const checkandinsertstklist = async (stksym) => {
+
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stocklist = models.stocklist
+  let prclist 
+  await stocklist.count({where: {
+        symbol: {
+          [Op.eq] : stksym
+        }
+      }
+    }).then(data => prclist=data) 
+    console.log('data checkandinsertstklist',prclist)
+    if (prclist === 0){
+      await stocklist.create({'symbol':stksym,'name':stksym,'sector':'UNKOWN','updated_on':'2021-01-01','track':1})
+    }else{
+      await stocklist.update({'track':1},{where:{symbol:stksym}})
+    } 
+ } 
+
+ const getcdlpatterns = async () => {
+  let allcdlptrns = ''
+  let myCache = require('../servercache/cacheitems')
+  allcdlptrns = myCache.getCache("ALL_CANDLE_PATTERNS")
+  //console.log("myCache.getStats",myCache.getCacheStats(),myCache.getCacheKeys(),allcdlptrns)
+  if (allcdlptrns === undefined){  
+    var initModels = require("../models/init-models"); 
+    var models = initModels(sequelize);
+    var cdlpttrns = models.stockcandlepatterns
+    await cdlpttrns.findAll().then(data => allcdlptrns=data) 
+      //console.log('data getcdlpatterns',allcdlptrns)
+    if (allcdlptrns !== ''){
+        let cacheset = myCache.setCacheWithTtl("ALL_CANDLE_PATTERNS",allcdlptrns,60000)
+        //console.log("Cache was set in function getcdlpatterns...",cacheset)
+    }  
+  }  
+  return allcdlptrns
+ }
+ const getcdlpatternstrack = async (tracktype) => {
+  let allcdlptrns = ''
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var cdlpttrns = models.stockcandlepatterns
+  await cdlpttrns.findAll({where: {
+    track: {
+          [Op.eq] : tracktype
+        }
+      }
+    }).then(data => allcdlptrns=data) 
+  return allcdlptrns
+ }
+
+ const updcdlpatternstrack = async (cdlpattern,tracktype) =>{
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var cdlpttrns = models.stockcandlepatterns
+  cdlpttrns.update( {track: tracktype ? 1:0},
+    {where: {
+      candlepattern: {
+            [Op.eq] : cdlpattern
+          }
+        }
+    }).then(result => console.log('Result as part of update',result))
+    let myCache = require('../servercache/cacheitems')
+    value = myCache.delCachedKey("ALL_CANDLE_PATTERNS");
+    console.log("delete cache key - ",value,myCache.getCacheKeys())
+ }
+
+ const getAllIndicatorParams = async () =>{
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var cdlpttrns = models.stockindicatorparams
+  let retdata = ""
+  await cdlpttrns.findAll().then(result => console.log('Result of getAllIndicatorParams',retdata = result))
+  return retdata
+ }
+
+ const flushAllCache = async () =>{
+  let myCache = require('../servercache/cacheitems')
+  console.log("before flushing - ",myCache.getCacheStats())
+  let retVal = myCache.flushAll()
+  console.log("after flushing - ",myCache.getCacheStats())
+  return retVal
+ }
+
+ const stopTrackingStock = async (stkSym) =>{
+    var initModels = require("../models/init-models"); 
+    var models = initModels(sequelize);
+    var stocklist = models.stocklist
+    try {
+      await stocklist.update({'track':0},{where:{symbol:stkSym}})
+      return true
+    } catch (error) {
+      console.log("stopTrackingStock - Error when stopping tracking",error)
+      return false
+    }
+ }
+
+module.exports = {stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,updcdlpatternstrack,getAllIndicatorParams, flushAllCache};
