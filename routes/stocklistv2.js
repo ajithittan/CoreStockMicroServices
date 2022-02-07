@@ -45,14 +45,24 @@ module.exports = (app) => {
         }
         return res.status(200).send(response);
       });
-      app.post('/api/v2/stocks/getstkdata/:stksym', async (req, res) => {
+      app.post('/api/v2/stocks/getstkdata/:stksym/:position', async (req, res) => {
         let response
         try{
           console.log('in here to get data from yahoo....')
           var masterstkops = require('../server/stockmaster');
-          await masterstkops.getStockHistData(req.params.stksym).then(data => response=data)
-          //console.log('data returned', response)
-          //return stkData
+          await masterstkops.getStockHistData(req.params.stksym,req.params.position).then(data => response=data)
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
+      app.get('/api/v2/sectors', async (req, res) => {
+        const fetch = require("node-fetch");
+        var masterstkops = require('../server/stockmaster');
+        let response
+        try{
+          response = await masterstkops.getStockSectors()
         }
         catch (err){
           console.log(err)

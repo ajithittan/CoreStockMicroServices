@@ -103,7 +103,7 @@ const formatResp = (respfromext) =>{
   return retvals
 }
 
-const getStockHistData = async (stksym) => {
+const getStockHistData = async (stksym,position) => {
   
   let response
   let enddt = new Date()
@@ -115,7 +115,7 @@ const getStockHistData = async (stksym) => {
   const yahooFinance = require('yahoo-finance');     
   await yahooFinance.historical({
     symbol: stksym,
-    from: '2009-01-01',
+    from: '2000-01-01',
     to: enddt,
     period: 'd'
 
@@ -124,7 +124,7 @@ const getStockHistData = async (stksym) => {
   if (response.length > 0){
     try{
       await insertintostkprcday(response)
-      await checkandinsertstklist(stksym)  
+      position === 1 ? await checkandinsertstklist(stksym) : null
     }catch (error) {
       console.log("getStockHistData - Error when updating DB from Yahoo",error,response,stksym)
       return false
@@ -246,4 +246,35 @@ const insertintostkprcday = async (arrofprices) => {
     }
  }
 
-module.exports = {stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,updcdlpatternstrack,getAllIndicatorParams, flushAllCache};
+const getStockSectors = async () =>{
+
+  let dbresponse = await getStockSectorsfromDB()
+  let unqSectors = [...new Set(dbresponse.map(item => item.sector))]
+  let retVal = []
+
+  for (let i=0;i < unqSectors.length; i++ ){
+    retVal.push({"sector":unqSectors[i],"stocks":dbresponse.filter(item => item.sector===unqSectors[i]).map(x => x.symbol)})
+  }
+  return retVal
+}
+
+ const getStockSectorsfromDB = async () =>{
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stocklist = models.stocklist
+  let dbresponse = []
+  try {
+      await stocklist.findAll({
+      attributes: ['sector','symbol'],
+      where: {groupsector: {
+        [Op.eq] : 1
+      }},
+      group: ['sector','symbol']
+    }).then(data => dbresponse=data) 
+  } catch (error) {
+    console.log("stopTrackingStock - Error when stopping tracking",error)
+  }
+  return dbresponse
+ }
+
+module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,updcdlpatternstrack,getAllIndicatorParams, flushAllCache};

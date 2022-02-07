@@ -30,6 +30,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TINYINT,
       allowNull: false,
       defaultValue: 1
+    },
+    groupsector: {
+      type: DataTypes.TINYINT,
+      allowNull: false,
+      defaultValue: 1
     }
   }, {
     sequelize,
