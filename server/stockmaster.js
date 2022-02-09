@@ -246,7 +246,27 @@ const insertintostkprcday = async (arrofprices) => {
     }
  }
 
-const getStockSectors = async () =>{
+ const getStockSectors = async () =>{
+
+  let dbresponse = await getStockSectorsfromDB()
+  console.log(dbresponse)
+  return dbresponse
+}
+
+const getStockSectorsfromDB = async () =>{
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stocksector = models.stocksector
+  try {
+        await stocksector.findAll({
+        attributes: ['sector','stocks']
+      }).then(data => dbresponse=data) 
+    } catch (error) {
+      console.log("stopTrackingStock - Error when stopping tracking",error)
+    }
+    return dbresponse
+}
+const getStockSectors_old = async () =>{
 
   let dbresponse = await getStockSectorsfromDB()
   let unqSectors = [...new Set(dbresponse.map(item => item.sector))]
@@ -258,7 +278,7 @@ const getStockSectors = async () =>{
   return retVal
 }
 
- const getStockSectorsfromDB = async () =>{
+ const getStockSectorsfromDB_Old = async () =>{
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize);
   var stocklist = models.stocklist
@@ -269,7 +289,7 @@ const getStockSectors = async () =>{
       where: {groupsector: {
         [Op.eq] : 1
       }},
-      group: ['sector','symbol']
+      group: ['sector','symbol','idstocksector']
     }).then(data => dbresponse=data) 
   } catch (error) {
     console.log("stopTrackingStock - Error when stopping tracking",error)
@@ -277,4 +297,19 @@ const getStockSectors = async () =>{
   return dbresponse
  }
 
-module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,updcdlpatternstrack,getAllIndicatorParams, flushAllCache};
+ const createStockSectors = async (sector,userId) =>{
+  let retval = false
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize); 
+  var stocksector = models.stocksector
+  try{
+    await stocksector.create({'sector':sector.sector,'stocks':sector.stocks,'userid':userId})
+    retval = true
+  }catch(error){
+    console.log("createStockSectors - Error when creating sector",error)
+  }
+  return retval
+ }
+
+module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
+                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors};

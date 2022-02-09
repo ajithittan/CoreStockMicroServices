@@ -13,6 +13,7 @@ var _stocksupportpoints = require("./stocksupportpoints");
 var _stockpositions = require("./stockpositions");
 var _usercustomizeoptions = require("./usercustomizeoptions")
 var _feedsources = require("./feedsources")
+var _stocksector = require("./stocksector")
 
 function initModels(sequelize) {
   var stockindicatorparams = _stockindicatorparams(sequelize, DataTypes);
@@ -29,6 +30,7 @@ function initModels(sequelize) {
   var stockpositions = _stockpositions(sequelize, DataTypes);
   var usercustomizeoptions = _usercustomizeoptions(sequelize, DataTypes);
   var feedsources = _feedsources(sequelize, DataTypes);
+  var stocksector = _stocksector(sequelize, DataTypes);
 
   return {
     stockindicatorparams,
@@ -44,7 +46,8 @@ function initModels(sequelize) {
     stocksupportpoints,
     stockpositions,
     usercustomizeoptions,
-    feedsources
+    feedsources,
+    stocksector
   };
 }
 module.exports = initModels;
