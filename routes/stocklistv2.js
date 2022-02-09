@@ -76,7 +76,7 @@ module.exports = (app) => {
           if (response){
             let stocks = req.body.stocks
             for (let i=0;i < stocks.length;i++ ){
-              await masterstkops.getStockHistData(stocks[i],0)
+                await masterstkops.getStockHistData(stocks[i],0)
             }
           }
         }
