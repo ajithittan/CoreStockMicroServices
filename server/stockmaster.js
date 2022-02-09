@@ -259,7 +259,7 @@ const getStockSectorsfromDB = async () =>{
   var stocksector = models.stocksector
   try {
         await stocksector.findAll({
-        attributes: ['sector','stocks']
+        attributes: ['sector','stocks','idstocksector']
       }).then(data => dbresponse=data) 
     } catch (error) {
       console.log("stopTrackingStock - Error when stopping tracking",error)
@@ -311,5 +311,22 @@ const getStockSectors_old = async () =>{
   return retval
  }
 
+ const deleteSector = async (sectorid) =>{
+  let retval = false
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize); 
+  var stocksector = models.stocksector
+  try{
+    await stocksector.destroy({
+      where: {
+        idstocksector: sectorid
+      }
+   }).then(retval = true)
+  }catch(error){
+    console.log("deleteSector - Error when deleting sector",error)
+  }
+  return retval
+ }
+
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
-                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors};
+                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector};

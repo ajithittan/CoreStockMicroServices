@@ -85,5 +85,16 @@ module.exports = (app) => {
         }
         return res.status(200).send(response);
       });
+      app.post('/api/v2/delsectors/:sectorid', async (req, res) => {
+        var masterstkops = require('../server/stockmaster');
+        let response
+        try{
+          response = await masterstkops.deleteSector(req.params.sectorid)
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
   }
    
