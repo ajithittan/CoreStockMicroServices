@@ -32,6 +32,19 @@ module.exports = (app) => {
       }
       return res.status(200).send(response);
     });
+    app.get('/api/v2/stocks/secperchange/:stksym/:stkdur/:rollup/:unit', async (req, res) => {
+      const fetch = require("node-fetch");
+      let response
+      try{
+        await fetch(URL_HOST + 'Stk1/secperchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.rollup + '/' + req.params.unit)
+        .then(res => res.json())
+        .then(json => {response=json});
+      }
+      catch (err){
+        console.log(err)
+      }
+      return res.status(200).send(response);
+    });    
     app.get('/api/v2/stocks/similarstks/:stksym', async (req, res) => {
         const fetch = require("node-fetch");
         const getperchangedata = require('../server/stockdatatransform')
