@@ -328,5 +328,22 @@ const getStockSectors_old = async () =>{
   return retval
  }
 
+ const updSectors = async (sectors) =>{
+  let retval = false
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize); 
+  var stocksector = models.stocksector
+  try{
+    for (let i=0;i<sectors.length;i++){
+      await stocksector.update({'sector':sectors[i].sector,'stocks':sectors[i].stocks},{where:{idstocksector:sectors[i].idstocksector}})
+    }
+  }catch(error){
+    console.log("deleteSector - Error when deleting sector",error)
+  }
+  return retval
+ }
+
+ 
+
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
-                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector};
+                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors};
