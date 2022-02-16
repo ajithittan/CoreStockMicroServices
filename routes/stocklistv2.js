@@ -130,5 +130,16 @@ module.exports = (app) => {
         }
         return res.status(200).send(response);
       });
+      app.post('/api/v2/syncstkprices', async (req, res) => {
+        var masterstkops = require('../server/stockmaster');
+        let response
+        try{
+          response = await masterstkops.updateAllStockPrices()
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
   }
    

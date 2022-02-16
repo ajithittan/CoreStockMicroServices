@@ -2,6 +2,10 @@ const DBConfig = require("../config/db.config.js");
 const { Op } = require("sequelize");
 const conf = new DBConfig()
 
+const URLConfig = require("../config/url.config.js");
+const urlconf = new URLConfig()
+const URL_HOST = urlconf.HOST
+
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(conf.DB, conf.USER, conf.PASSWORD, {
     host: conf.HOST,
@@ -268,37 +272,6 @@ const getStockSectorsfromDB = async () =>{
     }
     return dbresponse
 }
-const getStockSectors_old = async () =>{
-
-  let dbresponse = await getStockSectorsfromDB()
-  let unqSectors = [...new Set(dbresponse.map(item => item.sector))]
-  let retVal = []
-
-  for (let i=0;i < unqSectors.length; i++ ){
-    retVal.push({"sector":unqSectors[i],"stocks":dbresponse.filter(item => item.sector===unqSectors[i]).map(x => x.symbol)})
-  }
-  return retVal
-}
-
- const getStockSectorsfromDB_Old = async () =>{
-  var initModels = require("../models/init-models"); 
-  var models = initModels(sequelize);
-  var stocklist = models.stocklist
-  let dbresponse = []
-  try {
-      await stocklist.findAll({
-      attributes: ['sector','symbol'],
-      where: {groupsector: {
-        [Op.eq] : 1
-      }},
-      group: ['sector','symbol','idstocksector']
-    }).then(data => dbresponse=data) 
-  } catch (error) {
-    console.log("stopTrackingStock - Error when stopping tracking",error)
-  }
-  return dbresponse
- }
-
  const createStockSectors = async (sector,userId) =>{
   let retval = false
   var initModels = require("../models/init-models"); 
@@ -346,7 +319,71 @@ const getStockSectors_old = async () =>{
   return retval
  }
 
+ const updateAllSectorStks = (setStks) =>{
+  setStks.forEach(
+    item => getStockHistData(item,0)
+  )
+ }
+
+ const getStockHistDataMultiple = async (stksym) => {
+  
+  console.log(stksym)
+  let response
+  let enddt = new Date()
+  let dow = enddt.getDay()
+
+  if (dow === 1 || dow === 2 || dow === 3 || dow === 4 || dow === 5){
+    enddt.setDate(enddt.getDate() - 1)
+  }
+  const yahooFinance = require('yahoo-finance');     
+  await yahooFinance.historical({
+    symbols: stksym,
+    from: '2000-01-01',
+    to: enddt,
+    period: 'd'
+
+  }).then(result => response=result)
+  console.log(response)
+  return response
+}
+
+ const getAllSecStocksNormalized = async () =>{
+  let stkSecs = await getStockSectors()
+  return ([...stkSecs.map(item => item.stocks)].flat())
+ }
+
+ const getAllPosStks = async () =>{
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stocklist = models.stocklist
+  let dbresponse = []
+
+  await stocklist.findAll({where: {
+    track: {
+      [Op.eq] : 1
+    }
+  }}).then(data => dbresponse=data) 
+
+  return(dbresponse.map(item => item.symbol))
+
+ }
+
+ const updateAllStockPrices = async () =>{
+  
+  let postks = await getAllPosStks()
+  let secStks = await getAllSecStocksNormalized()
+
+  let setOfStks = new Set([...postks,...secStks])
+  await getStockHistDataMultiple([...setOfStks])
+  //console.log(setOfStks)
+
+  return{
+    'position': await postks,
+    'sector' : await secStks
+  }
+
+ }
  
 
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
-                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors};
+                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,updateAllStockPrices};
