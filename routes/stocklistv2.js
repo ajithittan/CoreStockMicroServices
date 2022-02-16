@@ -111,13 +111,17 @@ module.exports = (app) => {
       });
       app.post('/api/v2/updsectors', async (req, res) => {
         var masterstkops = require('../server/stockmaster');
-        let response
+        let request = req.body
+        let response 
         try{
-          response = await masterstkops.updSectors(req.body,'007')
+          console.log(request)
+          response = await masterstkops.updSectors(request,'007')
           if (response){
-            let stocks = req.body.stocks
-            for (let i=0;i < stocks.length;i++ ){
-                await masterstkops.getStockHistData(stocks[i],0)
+            for (let j=0;j<request.length;j++){
+              let stocks = request[j].stocks
+              for (let i=0;i < stocks.length;i++ ){
+                  await masterstkops.getStockHistData(stocks[i],0)
+              }  
             }
           }
         }

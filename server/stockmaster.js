@@ -121,6 +121,8 @@ const getStockHistData = async (stksym,position) => {
 
   }).then(result => response=result)
 
+  console.log(response)
+
   if (response.length > 0){
     try{
       await insertintostkprcday(response)
@@ -329,7 +331,7 @@ const getStockSectors_old = async () =>{
  }
 
  const updSectors = async (sectors) =>{
-  let retval = false
+  let retval = true
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize); 
   var stocksector = models.stocksector
@@ -338,6 +340,7 @@ const getStockSectors_old = async () =>{
       await stocksector.update({'sector':sectors[i].sector,'stocks':sectors[i].stocks},{where:{idstocksector:sectors[i].idstocksector}})
     }
   }catch(error){
+    retval = false
     console.log("deleteSector - Error when deleting sector",error)
   }
   return retval
