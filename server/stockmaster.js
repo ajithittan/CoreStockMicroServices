@@ -255,7 +255,6 @@ const insertintostkprcday = async (arrofprices) => {
  const getStockSectors = async () =>{
 
   let dbresponse = await getStockSectorsfromDB()
-  console.log(dbresponse)
   return dbresponse
 }
 
@@ -343,7 +342,6 @@ const getStockSectorsfromDB = async () =>{
     period: 'd'
 
   }).then(result => response=result)
-  console.log(response)
   return response
 }
 
@@ -372,14 +370,25 @@ const getStockSectorsfromDB = async () =>{
   
   let postks = await getAllPosStks()
   let secStks = await getAllSecStocksNormalized()
-
   let setOfStks = new Set([...postks,...secStks])
-  await getStockHistDataMultiple([...setOfStks])
-  //console.log(setOfStks)
+  let responsefromextsite = await getStockHistDataMultiple([...setOfStks])
+  let count = 0 
 
+  Object.values(responsefromextsite).forEach(async stockprice => {
+    try{
+      await insertintostkprcday(stockprice)
+      count++
+    }catch(error){
+      retval = false
+      console.log("updateAllStockPrices - Error when updateAllStockPrices",error,stockprice[0].symbol)
+    }
+  }
+  )
+  
   return{
-    'position': await postks,
-    'sector' : await secStks
+    'position': setOfStks,
+    'successful' :  count,
+    'failed': setOfStks.length - count
   }
 
  }
