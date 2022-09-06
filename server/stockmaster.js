@@ -269,25 +269,7 @@ const getStockSectorsfromDB = async () =>{
     } catch (error) {
       console.log("stopTrackingStock - Error when stopping tracking",error)
     }
-    console.log(dbresponse.map(item => 
-        {
-          let retval = {}
-          retval.sector = item.sector
-          retval.stocks = (item.stocks).split(",")
-          retval.idstocksector = item.idstocksector
-          return retval
-        }
-      )
-    )
-    return dbresponse.map(item => 
-      {
-        let retval = {}
-        retval.sector = item.sector
-        retval.stocks = (item.stocks).replace(/[^,a-zA-Z0-9]/g, '').split(",")
-        retval.idstocksector = item.idstocksector
-        return retval
-      }
-    )
+    return dbresponse
 }
  const createStockSectors = async (sector,userId) =>{
   let retval = false
