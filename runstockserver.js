@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors')
 const compression = require('compression')
+//const validateSession = require("./middlewares/session/validateSession")
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.disable('x-powered-by');
 app.use(bodyParser.json());
 app.use(cors())
 app.use(compression({filter: shouldCompress}))
+//app.use(validateSession)
 
 function shouldCompress (req, res) {
    if (req.headers['x-no-compression']) {
@@ -23,6 +25,7 @@ function shouldCompress (req, res) {
    return compression.filter(req, res)
  }
 
+ require('./routes/auth')(app);
 require('./routes/stocklist')(app);
 require('./routes/stockstats')(app);
 require('./routes/stockmaint')(app);
