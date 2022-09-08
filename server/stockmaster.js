@@ -13,13 +13,11 @@ const sequelize = new Sequelize(conf.DB, conf.USER, conf.PASSWORD, {
   })
 
 const getStockLists = async () => {
-    console.log('i n h e r e ---- getStockLists')
     let dbresponse = ''
     let arrstocklist = []
     try {
         let myCache = require('../servercache/cacheitems')
         arrstocklist = myCache.getCache("STOCK_HOME_PAGE")
-        console.log("myCache.getStats",myCache.getCacheStats(),arrstocklist)
         if (arrstocklist === undefined){
           arrstocklist = [];
           var initModels = require("../models/init-models"); 
@@ -48,7 +46,6 @@ const getStockLists = async () => {
           arrstocklist.sort((a, b) => Math.abs(b.perchange) - Math.abs(a.perchange))
             if (arrstocklist !== []){
                 let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE",arrstocklist,120)
-                console.log("Cache was set in function getStockLists...",cacheset)
             }    
         }
       }catch (error) {

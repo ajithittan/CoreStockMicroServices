@@ -4,7 +4,6 @@ module.exports = (app) => {
       let response
       try{
         await rssfeeds.getNewsFeeds(parseInt(req.params.type)).then(data => response=data);
-        console.log("newsfeed before sending back",typeof(response))
       }
       catch (err){
         console.log(err)

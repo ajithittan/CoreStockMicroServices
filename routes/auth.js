@@ -7,7 +7,8 @@ module.exports = (app) => {
     const fetch = require("node-fetch");
     let response
     try{
-      console.log("Google Auth",req.body)  
+      const checkGoogleSession = require('../middlewares/session/google/googlesession');
+      checkGoogleSession.validateGoogleSession(req.body.credential)
     }
     catch (err){
       console.log(err)
