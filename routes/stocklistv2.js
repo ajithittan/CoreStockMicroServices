@@ -2,7 +2,7 @@ const URLConfig = require("../config/url.config.js");
 const urlconf = new URLConfig()
 const URL_HOST = urlconf.HOST
 
-module.exports = (app) => {
+module.exports = (app,ensureAuthenticated) => {
     app.get('/api/v2/stocks/perchange/:stksym/:stkdur/:perchng', async (req, res) => {
       const fetch = require("node-fetch");
       const getperchangedata = require('../server/stockdatatransform')
@@ -70,7 +70,7 @@ module.exports = (app) => {
         }
         return res.status(200).send(response);
       });
-      app.get('/api/v2/sectors', async (req, res) => {
+      app.get('/api/v2/sectors', ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let response
         try{
@@ -81,7 +81,7 @@ module.exports = (app) => {
         }
         return res.status(200).send(response);
       });
-      app.post('/api/v2/sectors', async (req, res) => {
+      app.post('/api/v2/sectors', ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let response
         try{

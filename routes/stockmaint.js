@@ -2,8 +2,8 @@ const URLConfig = require("../config/url.config.js");
 const urlconf = new URLConfig()
 const URL_HOST = urlconf.HOST
 
-module.exports = (app) => {
-  app.get('/api/stkmaint/grps', async (req, res) => {
+module.exports = (app,ensureAuthenticated) => {
+  app.get('/api/stkmaint/grps', ensureAuthenticated, async (req, res) => {
     try{
       const fetch = require("node-fetch");
       await fetch(URL_HOST + 'Stk1/strategy/ALL')
