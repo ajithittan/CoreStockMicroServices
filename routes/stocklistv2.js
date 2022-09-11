@@ -72,7 +72,6 @@ module.exports = (app,ensureAuthenticated) => {
       });
       app.get('/api/v2/sectors', ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
-        console.log("req.user",req.user)
         let response
         try{
           response = await masterstkops.getStockSectors(req.user)
@@ -131,7 +130,7 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
-      app.post('/api/v2/syncstkprices',ensureAuthenticated, async (req, res) => {
+      app.post('/api/v2/syncstkprices', async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let response
         try{

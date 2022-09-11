@@ -40,8 +40,6 @@ const getUserDataForOps = async (userObj) =>{
     console.log("error in getUserDataForOps",error)
   }
 
-  console.log("retfromdb in getUserDataForOps",userProf)
-
   return userIdreturn
 }
 
@@ -307,6 +305,22 @@ const getStockSectorsfromDB = async (user) =>{
     }
     return dbresponse
 }
+
+const getAllStockSectors= async () =>{
+
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stocksector = models.stocksector
+  try {
+        await stocksector.findAll({  
+        attributes: ['sector','stocks','idstocksector']
+      }).then(data => dbresponse=(data))
+    } catch (error) {
+      console.log("getStockSectorsfromDB - Error",error)
+    }
+    return dbresponse
+}
+
  const createStockSectors = async (sector,userObj) =>{
   
   let retval = false
@@ -384,7 +398,7 @@ const getStockSectorsfromDB = async (user) =>{
 }
 
  const getAllSecStocksNormalized = async () =>{
-  let stkSecs = await getStockSectors()
+  let stkSecs = await getAllStockSectors()
   return ([...stkSecs.map(item => item.stocks)].flat())
  }
 
