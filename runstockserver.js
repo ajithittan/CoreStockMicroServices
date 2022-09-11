@@ -4,7 +4,7 @@ const cors = require('cors')
 const compression = require('compression')
 const session = require('express-session')
 const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20').Strategy
+require("./middlewares/userPassport")(passport)
 require('dotenv').config()
 
 const app = express();
@@ -23,29 +23,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-passport.serializeUser(function(user, cb) {
-  console.log("did I make it serializeUser",user)
-  cb(null, user);
-});
-
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
-});
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback",
-      passReqToCallback:true
-    },
-    function(request, accessToken, refreshToken, profile, done) {
-      return done(null, profile);
-    }
-  )
-);
 
 function shouldCompress (req, res) {
    if (req.headers['x-no-compression']) {
