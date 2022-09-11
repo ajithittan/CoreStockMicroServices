@@ -25,7 +25,7 @@ module.exports = function(sequelize, DataTypes) {
       },
       additionalinfo: {
         type: DataTypes.JSON,
-        allowNull: false
+        allowNull: true
       },
       createdt: {
         type: DataTypes.DATE,

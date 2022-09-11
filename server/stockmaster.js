@@ -12,6 +12,39 @@ const sequelize = new Sequelize(conf.DB, conf.USER, conf.PASSWORD, {
     dialect: conf.dialect
   })
 
+const getUserDataForOps = async (userObj) =>{
+
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var usrtable = models.userprofile
+  let userProf = {}
+  let userIdreturn = 0
+  let myCache = require('../servercache/cacheitems')
+  
+  try{
+    if (myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid)){
+      userIdreturn = myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid).iduserprofile
+    }
+    else{
+        await usrtable.findAll({where: {
+          uniqueUUID: {
+                    [Op.eq] : userObj.usrid
+                }
+            },raw : true
+        }).then(data => userProf=data)
+        userIdreturn = userProf[0].iduserprofile
+        myCache.setCacheWithTtl("USER_OBJECT_FOR_ID" + userObj.usrid,userProf[0],120)
+    }
+  }
+  catch(error){
+    console.log("error in getUserDataForOps",error)
+  }
+
+  console.log("retfromdb in getUserDataForOps",userProf)
+
+  return userIdreturn
+}
+
 const getStockLists = async () => {
     let dbresponse = ''
     let arrstocklist = []
@@ -249,32 +282,40 @@ const insertintostkprcday = async (arrofprices) => {
     }
  }
 
- const getStockSectors = async () =>{
-
-  let dbresponse = await getStockSectorsfromDB()
+ const getStockSectors = async (userObj) =>{
+  let userId = await getUserDataForOps(userObj)
+  let dbresponse = await getStockSectorsfromDB(userId)
   return dbresponse
 }
 
-const getStockSectorsfromDB = async () =>{
+const getStockSectorsfromDB = async (user) =>{
+
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize);
   var stocksector = models.stocksector
   try {
-        await stocksector.findAll({
-        attributes: ['sector','stocks','idstocksector']
+        await stocksector.findAll({  
+        attributes: ['sector','stocks','idstocksector'],
+        where: {
+          iduserprofile: {
+                [Op.eq] : user
+        }
+        }
       }).then(data => dbresponse=(data))
     } catch (error) {
-      console.log("stopTrackingStock - Error when stopping tracking",error)
+      console.log("getStockSectorsfromDB - Error",error)
     }
     return dbresponse
 }
- const createStockSectors = async (sector,userId) =>{
+ const createStockSectors = async (sector,userObj) =>{
+  
   let retval = false
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize); 
   var stocksector = models.stocksector
   try{
-    await stocksector.create({'sector':sector.sector,'stocks':sector.stocks,'userid':userId})
+    let userId = await getUserDataForOps(userObj)
+    await stocksector.create({'sector':sector.sector,'stocks':sector.stocks,'iduserprofile':userId})
     retval = true
   }catch(error){
     console.log("createStockSectors - Error when creating sector",error)

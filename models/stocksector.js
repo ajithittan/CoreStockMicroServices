@@ -15,8 +15,8 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.JSON,
       allowNull: false
     },
-    userid: {
-      type: DataTypes.STRING(1000),
+    iduserprofile: {
+      type: DataTypes.INTEGER,
       allowNull: false
     }
   }, {

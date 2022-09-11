@@ -72,9 +72,10 @@ module.exports = (app,ensureAuthenticated) => {
       });
       app.get('/api/v2/sectors', ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
+        console.log("req.user",req.user)
         let response
         try{
-          response = await masterstkops.getStockSectors()
+          response = await masterstkops.getStockSectors(req.user)
         }
         catch (err){
           console.log(err)
@@ -85,7 +86,7 @@ module.exports = (app,ensureAuthenticated) => {
         var masterstkops = require('../server/stockmaster');
         let response
         try{
-          response = await masterstkops.createStockSectors(req.body,'007')
+          response = await masterstkops.createStockSectors(req.body,req.user)
           if (response){
             let stocks = req.body.stocks
             for (let i=0;i < stocks.length;i++ ){
@@ -98,7 +99,7 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
-      app.post('/api/v2/delsectors/:sectorid', async (req, res) => {
+      app.post('/api/v2/delsectors/:sectorid',ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let response
         try{
@@ -109,7 +110,7 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
-      app.post('/api/v2/updsectors', async (req, res) => {
+      app.post('/api/v2/updsectors',ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let request = req.body
         let response 
@@ -130,7 +131,7 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
-      app.post('/api/v2/syncstkprices', async (req, res) => {
+      app.post('/api/v2/syncstkprices',ensureAuthenticated, async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let response
         try{
