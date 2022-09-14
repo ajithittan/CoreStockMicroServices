@@ -43,23 +43,25 @@ const getUserDataForOps = async (userObj) =>{
   return userIdreturn
 }
 
-const getStockLists = async () => {
+const getStockLists = async (userObj) => {
     let dbresponse = ''
     let arrstocklist = []
     try {
+        let userId = getUserDataForOps(userObj)
         let myCache = require('../servercache/cacheitems')
-        arrstocklist = myCache.getCache("STOCK_HOME_PAGE")
+        arrstocklist = myCache.getCache("STOCK_HOME_PAGE" + userId)
         if (arrstocklist === undefined){
           arrstocklist = [];
           var initModels = require("../models/init-models"); 
           var models = initModels(sequelize);
-          var stocklist = models.stocklist
+          var usrStkPos = models.userstockpositions
 
-          await stocklist.findAll({where: {
-            track: {
-              [Op.eq] : 1
+          await usrStkPos.findAll({where: {
+            iduserprofile: {
+              [Op.eq] : userId
             }
-          }}).then(data => dbresponse=data) 
+          }}).then(data => dbresponse=data[0].positions) 
+          console.log(dbresponse)
 
           for (let i=0;i<dbresponse.length;i++){
             const stockobj = {}
@@ -76,7 +78,7 @@ const getStockLists = async () => {
           }
           arrstocklist.sort((a, b) => Math.abs(b.perchange) - Math.abs(a.perchange))
             if (arrstocklist !== []){
-                let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE",arrstocklist,120)
+                let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE" + userId,arrstocklist,120)
             }    
         }
       }catch (error) {
