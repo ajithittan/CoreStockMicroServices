@@ -22,7 +22,7 @@ module.exports = (app) => {
     let response
     try{
       const getallstocks = require('../server/stockmaster');
-      response = await getallstocks.getStockLists()
+      response = await getallstocks.getStockLists(req.user)
       response.forEach(function(itm){
         itm.blink = false;
        })
