@@ -25,3 +25,5 @@ Curl's.
 
 curl -X POST http://127.0.0.1:5100/api/v2/stocks/getstkdata/AMZN
 curl http://127.0.0.1:5100/api/v2/sectors
+
+curl -X POST http://127.0.0.1:5100/api/v2/syncstkprices
