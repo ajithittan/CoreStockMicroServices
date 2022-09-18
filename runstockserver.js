@@ -37,11 +37,10 @@ const ensureAuthenticated = (req, res, next) => {
     return next();
   else
     res.send(false)
-    //res.writeHead(302, { Location: '/SendToLogin' }).end()
 }
  
 require('./routes/auth')(app,ensureAuthenticated);
-require('./routes/stocklist')(app);
+require('./routes/stocklist')(app,ensureAuthenticated);
 require('./routes/stockstats')(app);
 require('./routes/stockmaint')(app,ensureAuthenticated);
 require('./routes/stocksignal')(app);

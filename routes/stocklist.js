@@ -2,7 +2,7 @@ const URLConfig = require("../config/url.config.js");
 const urlconf = new URLConfig()
 const URL_HOST = urlconf.HOST
 
-module.exports = (app) => {
+module.exports = (app,ensureAuthenticated) => {
   app.get('/api/stocks', async (req, res) => {
     const fetch = require("node-fetch");
     let response
@@ -16,7 +16,7 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
-  app.get('/api/stocks/v2', async (req, res) => {
+  app.get('/api/stocks/v2',ensureAuthenticated, async (req, res) => {
     console.log('made it in v2?')
     const fetch = require("node-fetch");
     let response

@@ -3,7 +3,7 @@ module.exports = (app) => {
       const rssfeeds = require('../server/processrssfeeds');
       let response
       try{
-        await rssfeeds.getNewsFeeds(parseInt(req.params.type)).then(data => response=data);
+        await rssfeeds.getAggregatedNews(req.params.type).then(data => response=data);
       }
       catch (err){
         console.log(err)

@@ -23,7 +23,6 @@ module.exports = (passport) => {
             userProfileURL:"https://www.googleapis.com/oauth2/v3/userinfo"
           },
           async (request, accessToken, refreshToken, profile, done) => {
-            console.log(request, accessToken, refreshToken, profile, done)
             const userAcc = require('../server/useraccountmgmt')    
             let prof = await userAcc.createGoogleUser(profile)
             return done(null, prof);

@@ -22,8 +22,10 @@ const getUserDataForOps = async (userObj) =>{
   let myCache = require('../servercache/cacheitems')
   
   try{
+    console.log("cached value - ",myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid))
     if (myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid)){
       userIdreturn = myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid).iduserprofile
+      console.log("userIdreturn",userIdreturn)
     }
     else{
         await usrtable.findAll({where: {
@@ -47,7 +49,8 @@ const getStockLists = async (userObj) => {
     let dbresponse = ''
     let arrstocklist = []
     try {
-        let userId = getUserDataForOps(userObj)
+        
+        let userId = await getUserDataForOps(userObj)
         let myCache = require('../servercache/cacheitems')
         arrstocklist = myCache.getCache("STOCK_HOME_PAGE" + userId)
         if (arrstocklist === undefined){
@@ -61,19 +64,18 @@ const getStockLists = async (userObj) => {
               [Op.eq] : userId
             }
           }}).then(data => dbresponse=data[0].positions) 
-          console.log(dbresponse)
 
           for (let i=0;i<dbresponse.length;i++){
             const stockobj = {}
-            stockobj.symbol = dbresponse[i].symbol
-            let retfromextsite = await getperchange(dbresponse[i].symbol)
+            stockobj.symbol = dbresponse[i]
+            let retfromextsite = await getperchange(dbresponse[i])
             stockobj.perchange = retfromextsite.perchange
             stockobj.close = retfromextsite.latestprice
             stockobj.avgdayvol3mon = retfromextsite.avgdayvol3mon
             stockobj.avgdayvol10day = retfromextsite.avgdayvol10day
             stockobj.volume = retfromextsite.volume
-            stockobj.itemKey = dbresponse[i].symbol
-            stockobj.key = dbresponse[i].symbol
+            stockobj.itemKey = dbresponse[i]
+            stockobj.key = dbresponse[i]
             arrstocklist.push(stockobj)
           }
           arrstocklist.sort((a, b) => Math.abs(b.perchange) - Math.abs(a.perchange))
@@ -329,9 +331,10 @@ const getAllStockSectors= async () =>{
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize); 
   var stocksector = models.stocksector
+  let stkliks = new Set([...sector.stocks])
   try{
     let userId = await getUserDataForOps(userObj)
-    await stocksector.create({'sector':sector.sector,'stocks':sector.stocks,'iduserprofile':userId})
+    await stocksector.create({'sector':sector.sector,'stocks':Array.from(stkliks),'iduserprofile':userId})
     retval = true
   }catch(error){
     console.log("createStockSectors - Error when creating sector",error)

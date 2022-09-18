@@ -35,7 +35,7 @@ const createGoogleUser = async (googleObj) => {
         console.log("error in createGoogleUser",error)
     }
 
-    return {usrid: userObj.uuid}    
+    return {usrid: userObj.uuid, initial:userObj.fname[0] + userObj.lname[0]}    
 } 
   const chkForSocialProfile = async (uniqSocialId,socialProvider) =>{
         

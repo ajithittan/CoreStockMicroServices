@@ -80,25 +80,38 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
-  app.get('/api/stocksignals/indicators/:stksym/:stkInd/:stkdur', async (req, res) => {
+  app.get('/api/stocksignals/indicators/:stksym/:stkInd/:stkLast', async (req, res) => {
     let response
     try{
+      let defaultDur = 12
       let myCache = require('../servercache/cacheitems')
-      response = myCache.getCache(req.params.stkInd + '_' + req.params.stksym)
-      console.log('response from cache - indicators....',response,myCache.getCacheKeys(),req.params.stkInd + '_' + req.params.stksym)
+      response = myCache.getCache(req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur)
       if (response === undefined){
         const fetch = require("node-fetch");
-        await fetch(URL_HOST + 'StkStats/indicators/' + req.params.stksym + '/' + req.params.stkInd + '/' + req.params.stkdur)
+        await fetch(URL_HOST + 'StkStats/indicatorsatclose/' + req.params.stksym + '/' + req.params.stkInd + '/' + defaultDur)
         .then(res => res.json())
-        .then(json => {response=json});
-        let cacheset = myCache.setCache(req.params.stkInd + '_' + req.params.stksym,response)
-        console.log("Cache was set in /api/stocksignals/indicators/...",cacheset)
+        .then(json => {response=json})
+        
+        if (response.message){
+          throw 'Error from backend';
+        }else{
+          console.log("will set cache....",response)
+          myCache.setCache(req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur,response)
+        }
+      }
+      else{
+        console.log("found in cache...../api/stocksignals/indicators")
       }
     }
     catch (err){
-      console.log(err)
+      console.log("error in err api/stocksignals/indicators",err)
+      return res.status(200).send([])
     }
-    return res.status(200).send(response);
+    if (req.params.stkLast){
+      return res.status(200).send(JSON.parse(response).pop())
+    }else{
+      return res.status(200).send(response)
+    }
   });
   app.get('/api/stocksignals/v2/notifications/:tilldate', async (req, res) => {
     let response = ''
