@@ -95,7 +95,6 @@ module.exports = (app) => {
         if (response.message){
           throw 'Error from backend';
         }else{
-          console.log("will set cache....",response)
           myCache.setCache(req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur,response)
         }
       }

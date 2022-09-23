@@ -86,12 +86,13 @@ module.exports = (app,ensureAuthenticated) => {
         let response
         try{
           response = await masterstkops.createStockSectors(req.body,req.user)
+          /** 
           if (response){
             let stocks = req.body.stocks
             for (let i=0;i < stocks.length;i++ ){
                 await masterstkops.getStockHistData(stocks[i],0)
             }
-          }
+          }**/
         }
         catch (err){
           console.log(err)
@@ -135,6 +136,17 @@ module.exports = (app,ensureAuthenticated) => {
         let response
         try{
           response = await masterstkops.updateAllStockPrices()
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
+      app.post('/api/v2/savepositions', ensureAuthenticated, async (req, res) => {
+        var masterstkops = require('../server/stockmaster');
+        let response
+        try{
+          response = await masterstkops.savePositions(req.body,req.user)
         }
         catch (err){
           console.log(err)

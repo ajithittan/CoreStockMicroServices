@@ -54,6 +54,7 @@ const getStockLists = async (userObj) => {
         let myCache = require('../servercache/cacheitems')
         arrstocklist = myCache.getCache("STOCK_HOME_PAGE" + userId)
         if (arrstocklist === undefined){
+          console.log("Not in cache STOCK_HOME_PAGE"+ userId)
           arrstocklist = [];
           var initModels = require("../models/init-models"); 
           var models = initModels(sequelize);
@@ -82,6 +83,8 @@ const getStockLists = async (userObj) => {
             if (arrstocklist !== []){
                 let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE" + userId,arrstocklist,120)
             }    
+        }else{
+          console.log("found in cache....STOCK_HOME_PAGE"+ userId)
         }
       }catch (error) {
         console.error('Error in getStockLists function:', error);
@@ -335,6 +338,7 @@ const getAllStockSectors= async () =>{
   try{
     let userId = await getUserDataForOps(userObj)
     await stocksector.create({'sector':sector.sector,'stocks':Array.from(stkliks),'iduserprofile':userId})
+    await publishMessage("STOCK_EOD_PRICES",{stocks:Array.from(stkliks)})
     retval = true
   }catch(error){
     console.log("createStockSectors - Error when creating sector",error)
@@ -373,12 +377,6 @@ const getAllStockSectors= async () =>{
     console.log("deleteSector - Error when deleting sector",error)
   }
   return retval
- }
-
- const updateAllSectorStks = (setStks) =>{
-  setStks.forEach(
-    item => getStockHistData(item,0)
-  )
  }
 
  const getStockHistDataMultiple = async (stksym) => {
@@ -425,31 +423,110 @@ const getAllStockSectors= async () =>{
 
  const updateAllStockPrices = async () =>{
   
-  let postks = await getAllPosStks()
-  let secStks = await getAllSecStocksNormalized()
-  let setOfStks = new Set([...postks,...secStks])
-  let responsefromextsite = await getStockHistDataMultiple([...setOfStks])
-  let count = 0 
+    let postks = await getAllPosStks()
+    let secStks = await getAllSecStocksNormalized()
+    let setOfStks = new Set([...postks,...secStks])
+    let responsefromextsite = await getStockHistDataMultiple([...setOfStks])
+    let count = 0 
 
-  Object.values(responsefromextsite).forEach(async stockprice => {
-    try{
-      await insertintostkprcday(stockprice)
-      count++
-    }catch(error){
-      retval = false
-      console.log("updateAllStockPrices - Error when updateAllStockPrices",error,stockprice[0].symbol)
+    Object.values(responsefromextsite).forEach(async stockprice => {
+        try{
+          await insertintostkprcday(stockprice)
+          count++
+        }catch(error){
+          retval = false
+          console.log("updateAllStockPrices - Error when updateAllStockPrices",error,stockprice[0].symbol)
+        }
+      }
+    )
+    
+    return{
+      'position': setOfStks,
+      'successful' :  count,
+      'failed': setOfStks.length - count
     }
-  }
-  )
-  
-  return{
-    'position': setOfStks,
-    'successful' :  count,
-    'failed': setOfStks.length - count
-  }
 
  }
- 
+
+ const updStockPrices = async (arrofStks) =>{
+
+    let responsefromextsite = await getStockHistDataMultiple([...arrofStks])
+    let count = 0 
+
+    Object.values(responsefromextsite).forEach(async stockprice => {
+        try{
+          await insertintostkprcday(stockprice)
+          count++
+        }catch(error){
+          retval = false
+          console.log("updateAllStockPrices - Error when updateAllStockPrices",error,stockprice[0].symbol)
+        }
+      }
+    )
+    
+    return{
+      'position': setOfStks,
+      'successful' :  count,
+      'failed': setOfStks.length - count
+    }
+
+ }
+
+ const savePositions = async (newPos, userObj) =>{
+
+    let userId = await getUserDataForOps(userObj)
+    let currpos = []
+
+    var initModels = require("../models/init-models"); 
+    var models = initModels(sequelize);
+    var usrStkPos = models.userstockpositions
+
+    try{
+
+      await usrStkPos.findAll({where: {
+        iduserprofile: {
+          [Op.eq] : userId
+        }
+      }}).then(data => currpos=data) 
+
+      if (currpos.length > 0 ){
+        currpos = currpos[0].positions
+        let temppos = Array.from(new Set([...currpos,...newPos]))
+        await usrStkPos.update({'positions':temppos},{where:{iduserprofile:userId}}) 
+        await publishMessage("STOCK_EOD_PRICES",{stocks:[...newPos]})
+      }else{
+        await usrStkPos.create({'positions':[...newPos],'iduserprofile':userId,'createdt':Date.now()})
+        await publishMessage("STOCK_EOD_PRICES",{stocks:[...newPos]})
+      }
+
+      let myCache = require('../servercache/cacheitems')
+      myCache.delCachedKey("STOCK_HOME_PAGE" + userId)
+
+    }catch(err){
+      console.log("error in function savePositions",err)
+      return false
+    }
+
+    return true
+
+ }
+
+ const publishMessage =  async (type,message) =>{
+   let pubMsg = {}
+    try{
+        pubMsg.channel = type
+        pubMsg.message = message
+        const fetch = require("node-fetch"); 
+        console.log("pubMsgpubMsgpubMsgpubMsg",pubMsg)
+        await fetch(urlconf.PUB_MESSAGES, {method:'post', body: JSON.stringify(pubMsg), 
+                                          headers: { 'Content-Type': 'application/json' }})
+        .then(res => console.log(res))
+    }
+    catch (err){
+        console.log("error in publishMessage",err)
+    }
+ }
 
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
-                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,updateAllStockPrices};
+                updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
+                savePositions,updateAllStockPrices,updStockPrices};
