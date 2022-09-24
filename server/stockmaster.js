@@ -81,7 +81,7 @@ const getStockLists = async (userObj) => {
           }
           arrstocklist.sort((a, b) => Math.abs(b.perchange) - Math.abs(a.perchange))
             if (arrstocklist !== []){
-                let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE" + userId,arrstocklist,120)
+                let cacheset = myCache.setCacheWithTtl("STOCK_HOME_PAGE" + userId,arrstocklist,60)
             }    
         }else{
           console.log("found in cache....STOCK_HOME_PAGE"+ userId)
@@ -426,25 +426,9 @@ const getAllStockSectors= async () =>{
     let postks = await getAllPosStks()
     let secStks = await getAllSecStocksNormalized()
     let setOfStks = new Set([...postks,...secStks])
-    let responsefromextsite = await getStockHistDataMultiple([...setOfStks])
-    let count = 0 
 
-    Object.values(responsefromextsite).forEach(async stockprice => {
-        try{
-          await insertintostkprcday(stockprice)
-          count++
-        }catch(error){
-          retval = false
-          console.log("updateAllStockPrices - Error when updateAllStockPrices",error,stockprice[0].symbol)
-        }
-      }
-    )
-    
-    return{
-      'position': setOfStks,
-      'successful' :  count,
-      'failed': setOfStks.length - count
-    }
+    await publishMessage("STOCK_EOD_PRICES",{stocks:[...setOfStks]})
+    return true
 
  }
 
@@ -527,6 +511,59 @@ const getAllStockSectors= async () =>{
     }
  }
 
+ const deleteStkPositions = async (removeStk, userObj) =>{
+
+    let userId = await getUserDataForOps(userObj)
+    let currpos = []
+
+    var initModels = require("../models/init-models"); 
+    var models = initModels(sequelize);
+    var usrStkPos = models.userstockpositions
+
+    try{
+
+        await usrStkPos.findAll({where: {
+          iduserprofile: {
+            [Op.eq] : userId
+          }
+        }}).then(data => currpos=data) 
+        console.log("positions......",currpos,removeStk)
+        currpos = currpos[0].positions.filter(item => item != removeStk)
+
+        if (currpos.length === 0 ){
+          await usrStkPos.delete({where:{iduserprofile:userId}}) 
+        }else{
+          await usrStkPos.update({'positions':currpos},{where:{iduserprofile:userId}}) 
+        }
+
+        let myCache = require('../servercache/cacheitems')
+        myCache.delCachedKey("STOCK_HOME_PAGE" + userId)
+
+    }catch(err){
+      console.log("error in function deleteStkPositions",err)
+      return false
+    }
+
+    return true
+
+}
+
+const getValidityOfStock = async (stkSym) =>{
+  const yahooFinance = require('yahoo-finance');
+  let retval = {}
+  retval.status = false
+
+  await yahooFinance.quote({
+    symbol: stkSym,
+    modules: ['price']       // optional; default modules.
+  }).then(quote => {  retval.status=true;
+                      retval.details=quote}
+          ).catch(err => console.log("there is an error",err));
+
+  return retval
+
+}
+
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
-                savePositions,updateAllStockPrices,updStockPrices};
+                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock};

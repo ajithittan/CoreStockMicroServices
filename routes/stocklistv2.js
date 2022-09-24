@@ -153,5 +153,28 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
+      app.post('/api/v2/deletestkpos/:stksym', ensureAuthenticated, async (req, res) => {
+        var masterstkops = require('../server/stockmaster');
+        let response
+        try{
+          response = await masterstkops.deleteStkPositions(req.params.stksym,req.user)
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
+      app.get('/api/v2/checkvalidstock/:stksym', async (req, res) => {
+        const masterstkops = require('../server/stockmaster')
+        let response
+        try{
+          response = await masterstkops.getValidityOfStock(req.params.stksym)
+          console.log(response)
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
   }
    
