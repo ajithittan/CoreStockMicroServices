@@ -27,3 +27,5 @@ curl -X POST http://127.0.0.1:5100/api/v2/stocks/getstkdata/AMZN
 curl http://127.0.0.1:5100/api/v2/sectors
 
 curl -X POST http://127.0.0.1:5100/api/v2/syncstkprices
+
+curl -X POST  -H "Content-Type: application/json" -d '{"stocks": ["CR11VS"]}' http://127.0.0.1:5400/api/processsubmsgs/updatestockprice
