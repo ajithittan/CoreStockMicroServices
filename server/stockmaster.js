@@ -531,7 +531,7 @@ const getAllStockSectors= async () =>{
         currpos = currpos[0].positions.filter(item => item != removeStk)
 
         if (currpos.length === 0 ){
-          await usrStkPos.delete({where:{iduserprofile:userId}}) 
+          await usrStkPos.destroy({where:{iduserprofile:userId}}) 
         }else{
           await usrStkPos.update({'positions':currpos},{where:{iduserprofile:userId}}) 
         }
