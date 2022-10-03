@@ -564,6 +564,33 @@ const getValidityOfStock = async (stkSym) =>{
 
 }
 
+const getCompanyDetails = async (stkSym) =>{
+  let retval = {}
+  let retfromyahoo = undefined
+  let myCache = require('../servercache/cacheitems')
+
+  let cacheVal = myCache.getCache("COMPANY_DETAILS_" + stkSym)
+
+  if (cacheVal){
+    retval = cacheVal
+    console.log("found cached value for company details",cacheVal)
+  }else{
+    const yahooFinance = require('yahoo-finance');
+    const yahFormat = require('./yahooformat')
+
+    await yahooFinance.quote({
+      symbol: stkSym,
+      modules: ['price','summaryProfile','financialData','defaultKeyStatistics']       // optional; default modules.
+    }).then(quote => retfromyahoo = quote)
+      .catch(err => console.log("there is an error",err));
+
+      retval = await yahFormat.formatCompanyDetails(retfromyahoo,stkSym)
+      console.log("retval",retval)
+  }
+          
+  return retval
+}
+
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
-                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock};
+                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,getCompanyDetails};

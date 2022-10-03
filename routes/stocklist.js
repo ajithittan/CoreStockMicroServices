@@ -76,12 +76,10 @@ module.exports = (app,ensureAuthenticated) => {
   });
 
   app.get('/api/stocks/:stksym/:stkdur', async (req, res) => {
-    const fetch = require("node-fetch");
-    let response
+    const stkQuotes = require('../server/stockquotes')
+    let response = {}
     try{
-      await fetch(URL_HOST + 'Stk1/' + req.params.stksym + '/' + req.params.stkdur)
-      .then(res => res.json())
-      .then(json => {response=json});
+      response = await stkQuotes.getStockPricesForDuration(req.params.stksym,parseInt(req.params.stkdur))
     }
     catch (err){
       console.log(err)

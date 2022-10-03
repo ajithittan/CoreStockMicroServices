@@ -169,7 +169,28 @@ module.exports = (app,ensureAuthenticated) => {
         let response
         try{
           response = await masterstkops.getValidityOfStock(req.params.stksym)
-          console.log(response)
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
+      app.get('/api/v2/companydetails/:stksym', async (req, res) => {
+        const masterstkops = require('../server/stockmaster')
+        let response
+        try{
+          response = await masterstkops.getCompanyDetails(req.params.stksym)
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
+      app.get('/api/v2/compqtrperf/:stksym/:forChart', async (req, res) => {
+        const masterstkops = require('../server/companyperformance')
+        let response
+        try{
+          response = await masterstkops.getCompanyQtrPerf(req.params.stksym,parseInt(req.params.forChart))
         }
         catch (err){
           console.log(err)
@@ -177,4 +198,3 @@ module.exports = (app,ensureAuthenticated) => {
         return res.status(200).send(response);
       });
   }
-   
