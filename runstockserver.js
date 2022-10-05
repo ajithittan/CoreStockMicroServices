@@ -51,6 +51,7 @@ require('./routes/stockstreams')(app);
 require('./routes/stockpositions')(app);
 require('./routes/useroptions')(app);
 require('./routes/rssfeeds')(app);
+require('./routes/stocknewsfeed')(app,ensureAuthenticated);
 require('./routes/googleauth')(app,passport)
 
 if (process.env.NODE_ENV === 'production') {
