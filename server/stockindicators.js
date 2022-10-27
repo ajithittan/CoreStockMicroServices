@@ -19,7 +19,7 @@ StockIndicators.prototype.getAllIndicators = async function () {
         console.log("value returned from cache....",response)
         if (response === undefined){
             const fetch = require("node-fetch");
-            await fetch(URL_HOST + 'StkStats/indicators/' + this.stksymbol + '/ALL_IND/' + this.durmonths)
+            await fetch(URL_HOST + 'pricetrends/indicators/' + this.stksymbol + '/ALL_IND/' + this.durmonths)
             .then(res => res.json())
             .then(json => {response=json});
             console.log('what is the response ?', response)

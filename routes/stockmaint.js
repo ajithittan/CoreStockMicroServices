@@ -6,7 +6,7 @@ module.exports = (app,ensureAuthenticated) => {
   app.get('/api/stkmaint/grps', ensureAuthenticated, async (req, res) => {
     try{
       const fetch = require("node-fetch");
-      await fetch(URL_HOST + 'Stk1/strategy/ALL')
+      await fetch(URL_HOST + 'pricetrends/strategy/ALL')
       .then(res => res.json())
       .then(json => {response=json});
     }

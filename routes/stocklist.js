@@ -23,9 +23,6 @@ module.exports = (app,ensureAuthenticated) => {
     try{
       const getallstocks = require('../server/stockmaster');
       response = await getallstocks.getStockLists(req.user)
-      response.forEach(function(itm){
-        itm.blink = false;
-       })
     }
     catch (err){
       console.log(err)
@@ -37,7 +34,7 @@ module.exports = (app,ensureAuthenticated) => {
     const fetch = require("node-fetch");
     let response
     try{
-      await fetch(URL_HOST + 'Stk1/latestprc/' + req.params.stksym)
+      await fetch(URL_HOST + 'pricetrends/latestprc/' + req.params.stksym)
       .then(res => res.json())
       .then(json => {response=json});
     }
@@ -51,7 +48,7 @@ module.exports = (app,ensureAuthenticated) => {
     const fetch = require("node-fetch");
     let response
     try{
-      await fetch(URL_HOST + 'Stk1/historical/' + req.params.stksym)
+      await fetch(URL_HOST + 'pricetrends/historical/' + req.params.stksym)
       .then(res => res.json())
       .then(json => {response=json});
     }
@@ -91,7 +88,7 @@ module.exports = (app,ensureAuthenticated) => {
     const fetch = require("node-fetch");
     let response
     try{
-      await fetch(URL_HOST + 'Stk1/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.perchng)
+      await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.perchng)
       .then(res => res.json())
       .then(json => {response=json});
     }

@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const compression = require('compression')
 const session = require('express-session')
+//const session = require("./middlewares/session/session");
 const passport = require('passport')
 require("./middlewares/userPassport")(passport)
 require('dotenv').config()
@@ -14,6 +15,8 @@ app.use(bodyParser.json());
 app.use(cors())
 app.use(compression({filter: shouldCompress}))
 app.use(express.urlencoded({ extended: true}));
+//app.use(session)
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -47,7 +50,7 @@ require('./routes/stocksignal')(app);
 require('./routes/stocklistv2')(app,ensureAuthenticated);
 require('./routes/stockops')(app);
 require('./routes/stockpredictions')(app);
-require('./routes/stockstreams')(app);
+require('./routes/stockstreams')(app,ensureAuthenticated);
 require('./routes/stockpositions')(app);
 require('./routes/useroptions')(app);
 require('./routes/rssfeeds')(app);

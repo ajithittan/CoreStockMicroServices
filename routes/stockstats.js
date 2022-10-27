@@ -9,7 +9,7 @@ module.exports = (app) => {
     let response
     try{
       console.log("req",req.body)
-      await fetch(URL_HOST + 'StkStats/Compare/' + req.params.stkdur + '/' + req.params.perchng, {method:'post', body:JSON.stringify(req.body), headers: { 'Content-Type': 'application/json' }})
+      await fetch(URL_HOST + 'pricetrends/Compare/' + req.params.stkdur + '/' + req.params.perchng, {method:'post', body:JSON.stringify(req.body), headers: { 'Content-Type': 'application/json' }})
       .then(res => res.json())
       .then(json => {response=json});
     }
@@ -24,7 +24,7 @@ module.exports = (app) => {
     let response
     try{
       console.log("req",req.body)
-      await fetch(URL_HOST + 'StkStats/whatif/' + req.params.stksym + '/' + req.params.stkdur, {method:'post', body:JSON.stringify(req.body), headers: { 'Content-Type': 'application/json' }})
+      await fetch(URL_HOST + 'pricetrends/whatif/' + req.params.stksym + '/' + req.params.stkdur, {method:'post', body:JSON.stringify(req.body), headers: { 'Content-Type': 'application/json' }})
       .then(res => res.json())
       .then(json => {response=json});
     }

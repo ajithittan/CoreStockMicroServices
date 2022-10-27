@@ -9,7 +9,7 @@ module.exports = (app,ensureAuthenticated) => {
       let response
 
       try{
-        await fetch(URL_HOST + 'Stk1/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.perchng)
+        await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.perchng)
         .then(res => res.json())
         .then(json => {response=json});
         response = await getperchangedata.stockdataperchange(response)
@@ -19,11 +19,12 @@ module.exports = (app,ensureAuthenticated) => {
       }
       return res.status(200).send(response);
     });
-    app.get('/api/v2/stocks/perchange/:stksym/:stkdur/:rollup/:unit', async (req, res) => {
+    app.get('/api/v2/stocks/perchange/:stksym/:stkdur/:rollup/:unit/:byType', async (req, res) => {
       const fetch = require("node-fetch");
       let response
       try{
-        await fetch(URL_HOST + 'Stk1/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.rollup + '/' + req.params.unit)
+        await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' 
+                             + req.params.rollup + '/' + req.params.unit + '/' + req.params.byType)
         .then(res => res.json())
         .then(json => {response=json});
       }
@@ -32,11 +33,12 @@ module.exports = (app,ensureAuthenticated) => {
       }
       return res.status(200).send(response);
     });
-    app.get('/api/v2/stocks/secperchange/:stksym/:stkdur/:rollup/:unit', async (req, res) => {
+    app.get('/api/v2/stocks/secperchange/:stksym/:stkdur/:rollup/:unit/:byType', async (req, res) => {
       const fetch = require("node-fetch");
       let response
       try{
-        await fetch(URL_HOST + 'Stk1/secperchng/' + req.params.stksym + '/' + req.params.stkdur + '/' + req.params.rollup + '/' + req.params.unit)
+        await fetch(URL_HOST + 'pricetrends/secperchng/' + req.params.stksym + '/' + req.params.stkdur + '/' 
+                             + req.params.rollup + '/' + req.params.unit + '/' + req.params.byType)
         .then(res => res.json())
         .then(json => {response=json});
       }

@@ -45,7 +45,7 @@ const getUserDataForOps = async (userObj) =>{
   return userIdreturn
 }
 
-const getStockLists = async (userObj) => {
+const getStockLists = async (userObj,noCache) => {
     let dbresponse = ''
     let arrstocklist = []
     try {
@@ -53,7 +53,7 @@ const getStockLists = async (userObj) => {
         let userId = await getUserDataForOps(userObj)
         let myCache = require('../servercache/cacheitems')
         arrstocklist = myCache.getCache("STOCK_HOME_PAGE" + userId)
-        if (arrstocklist === undefined){
+        if (noCache || arrstocklist === undefined){
           console.log("Not in cache STOCK_HOME_PAGE"+ userId)
           arrstocklist = [];
           var initModels = require("../models/init-models"); 

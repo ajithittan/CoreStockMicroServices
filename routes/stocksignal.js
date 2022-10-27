@@ -88,7 +88,7 @@ module.exports = (app) => {
       response = myCache.getCache(req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur)
       if (response === undefined){
         const fetch = require("node-fetch");
-        await fetch(URL_HOST + 'StkStats/indicatorsatclose/' + req.params.stksym + '/' + req.params.stkInd + '/' + defaultDur)
+        await fetch(URL_HOST + 'pricetrends/indicatorsatclose/' + req.params.stksym + '/' + req.params.stkInd + '/' + defaultDur)
         .then(res => res.json())
         .then(json => {response=json})
         
@@ -96,6 +96,37 @@ module.exports = (app) => {
           throw 'Error from backend';
         }else{
           myCache.setCache(req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur,response)
+        }
+      }
+      else{
+        console.log("found in cache...../api/stocksignals/indicators")
+      }
+    }
+    catch (err){
+      console.log("error in err api/stocksignals/indicators",err)
+      return res.status(200).send([])
+    }
+    if (req.params.stkLast){
+      return res.status(200).send(JSON.parse(response).pop())
+    }else{
+      return res.status(200).send(response)
+    }
+  });
+  app.get('/api/indicators/:stksym/:stkInd/:stkdur', async (req, res) => {
+    let response
+    try{
+      let myCache = require('../servercache/cacheitems')
+      response = myCache.getCache(req.params.stkInd + '_' + req.params.stksym + '_' + req.params.stkdur)
+      if (response === undefined){
+        const fetch = require("node-fetch");
+        await fetch(URL_HOST + 'pricetrends/indicatorsatclose/' + req.params.stksym + '/' + req.params.stkInd + '/' + req.params.stkdur)
+        .then(res => res.json())
+        .then(json => {response=json})
+        
+        if (response.message){
+          throw 'Error from backend';
+        }else{
+          myCache.setCache(req.params.stkInd + '_' + req.params.stksym + '_' + req.params.stkdur,response)
         }
       }
       else{
@@ -165,5 +196,38 @@ module.exports = (app) => {
       console.log(err)
     }
     return res.status(200).send(response);
+  });  
+  app.get('/api/indicators/:stksym/:indType/:indVal/:stkdur', async (req, res) => {
+    let response
+    try{
+      let myCache = require('../servercache/cacheitems')
+      let cacheKey = req.params.stksym + '_' + req.params.indType + '_' + req.params.indVal + "_" + req.params.stkdur
+      response = myCache.getCache(cacheKey)
+      if (response === undefined){
+        const fetch = require("node-fetch");
+        await fetch(URL_HOST + 'pricetrends/indicatorsatclose/' + req.params.stksym + '/' + 
+                    req.params.indType + '/' + req.params.indVal + '/' + req.params.stkdur)
+        .then(res => res.json())
+        .then(json => {response=json})
+        
+        if (response.message){
+          throw 'Error from backend';
+        }else{
+          myCache.setCache(cacheKey,response)
+        }
+      }
+      else{
+        console.log("found in cache...../api/stocksignals/indicators" , cacheKey,response)
+      }
+    }
+    catch (err){
+      console.log("error in err api/stocksignals/indicators" + req.params.indVal,err)
+      return res.status(200).send([])
+    }
+    if (req.params.stkLast){
+      return res.status(200).send(JSON.parse(response).pop())
+    }else{
+      return res.status(200).send(response)
+    }
   });  
 }
