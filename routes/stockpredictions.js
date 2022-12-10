@@ -75,4 +75,18 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
+  app.post('/api/predictions/delmodel/:model', async (req, res) => {
+    const fetch = require("node-fetch");
+    let response
+    try{
+      await fetch(URL_PREDICTIONS + 'predictions/delete/' + req.params.model, 
+                                  {method:'post', headers: { 'Content-Type': 'application/json' }})
+      .then(res => res.json())
+      .then(json => {response=json});
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
   }
