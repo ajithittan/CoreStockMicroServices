@@ -550,15 +550,31 @@ const getAllStockSectors= async () =>{
 
 const getValidityOfStock = async (stkSym) =>{
   const yahooFinance = require('yahoo-finance');
+  const qtFormatter = require('./stocksourceformatter')
   let retval = {}
   retval.status = false
 
-  await yahooFinance.quote({
-    symbol: stkSym,
-    modules: ['price']       // optional; default modules.
-  }).then(quote => {  retval.status=true;
-                      retval.details=quote}
-          ).catch(err => console.log("there is an error",err));
+  let myCache = require('../servercache/cacheitems')
+
+  let cacheVal = myCache.getCache("VALID_SYMBOL_DETAILS_" + stkSym)
+
+  if (cacheVal){
+    retval = cacheVal
+    console.log("found cached value for getValidityOfStock",cacheVal)
+  }else{
+    await yahooFinance.quote({
+      symbol: stkSym,
+      modules: ['price']       // optional; default modules.
+    }).then(quote => {
+                        if(quote.price.longName){
+                          retval.status=true;
+                          retval.details=qtFormatter.formatQuote(quote)  
+                        }
+                     }
+            ).catch(err => console.log("there is an error",err));
+
+    myCache.setCacheWithTtl("VALID_SYMBOL_DETAILS_" + stkSym,retval,600)            
+  }          
 
   return retval
 
