@@ -17,7 +17,7 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
             await fetch(URL_HOST + 'pricetrends/' + stksym + '/' + stkdur)
             .then(res => res.json())
             .then(json => {response=json});  
-            myCache.setCacheWithTtl("STOCK_QUOTES_" + stksym + "_" + stkdur,response,60000)  
+            myCache.setCacheWithTtl("STOCK_QUOTES_" + stksym + "_" + stkdur,response,6000)  
         }
     }
     catch (err){
