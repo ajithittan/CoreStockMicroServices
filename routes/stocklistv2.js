@@ -119,6 +119,7 @@ module.exports = (app,ensureAuthenticated) => {
         try{
           console.log(request)
           response = await masterstkops.updSectors(request,'007')
+          /** 
           if (response){
             for (let j=0;j<request.length;j++){
               let stocks = request[j].stocks
@@ -127,6 +128,7 @@ module.exports = (app,ensureAuthenticated) => {
               }  
             }
           }
+          **/
         }
         catch (err){
           console.log(err)

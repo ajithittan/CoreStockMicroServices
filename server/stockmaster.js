@@ -369,8 +369,10 @@ const getAllStockSectors= async () =>{
   var models = initModels(sequelize); 
   var stocksector = models.stocksector
   try{
+    console.log("updating a stock sector in fn - updSectors",[...new Set(sectors.map(item => item.stocks).flat())])
     for (let i=0;i<sectors.length;i++){
       await stocksector.update({'sector':sectors[i].sector,'stocks':sectors[i].stocks},{where:{idstocksector:sectors[i].idstocksector}})
+      await publishMessage("STOCK_EOD_PRICES",{stocks:[...new Set(sectors.map(item => item.stocks).flat())]})
     }
   }catch(error){
     retval = false
