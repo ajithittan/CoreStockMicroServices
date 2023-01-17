@@ -503,7 +503,6 @@ const getAllStockSectors= async () =>{
         pubMsg.channel = type
         pubMsg.message = message
         const fetch = require("node-fetch"); 
-        console.log("pubMsgpubMsgpubMsgpubMsg",pubMsg)
         await fetch(urlconf.PUB_MESSAGES, {method:'post', body: JSON.stringify(pubMsg), 
                                           headers: { 'Content-Type': 'application/json' }})
         .then(res => console.log(res))

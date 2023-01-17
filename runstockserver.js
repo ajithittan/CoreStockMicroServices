@@ -52,7 +52,7 @@ require('./routes/stockops')(app);
 require('./routes/stockpredictions')(app);
 require('./routes/stockstreams')(app,ensureAuthenticated);
 require('./routes/stockpositions')(app);
-require('./routes/useroptions')(app);
+require('./routes/useroptions')(app,ensureAuthenticated);
 require('./routes/rssfeeds')(app);
 require('./routes/stocknewsfeed')(app,ensureAuthenticated);
 require('./routes/googleauth')(app,passport)
