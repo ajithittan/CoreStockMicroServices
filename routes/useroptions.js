@@ -11,14 +11,40 @@ module.exports = (app,ensureAuthenticated) => {
       }
       return res.status(200).send(response);
     });
-    app.post('/api/userPositions',ensureAuthenticated, async (req, res) => {
+    app.get('/api/userPositions/:stkSym', async (req, res) => {
+      const useroptions = require('../server/userdrivenoptions');
+      let response
+      try{
+        await useroptions.getExistingPortfolioPositions(req.user,req.params.stkSym).then(data => response=data);
+        console.log("userPortfolio - response before sending back",response)
+      }
+      catch (err){
+        console.log(err)
+      }
+      return res.status(200).send(response);
+    });
+    app.post('/api/userPositions/:stkSym',ensureAuthenticated, async (req, res) => {
       console.log("made it to userPositions",req.body)
       const fetch = require("node-fetch");
       const useroptions = require('../server/userdrivenoptions');
       let response = {}
       try{
-        console.log("req",req.body,req.user)
-        response = await useroptions.saveStockPositions(req.body,req.user)
+        console.log("userPositions",req.body,req.user)
+        response = await useroptions.saveStockPositions(req.body,req.user,req.params.stkSym)
+      }
+      catch (err){
+        console.log(err)
+      }
+      return res.status(200).send(response);
+    });
+    app.post('/api/deluserPositions/:stkSym',ensureAuthenticated, async (req, res) => {
+      console.log("made it to userPositions",req.body)
+      const fetch = require("node-fetch");
+      const useroptions = require('../server/userdrivenoptions');
+      let response = {}
+      try{
+        console.log("deluserPositions",req.body,req.user)
+        response = await useroptions.deleteStockPositions(req.body,req.user,req.params.stkSym)
       }
       catch (err){
         console.log(err)

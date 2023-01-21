@@ -91,13 +91,44 @@ const publishMessage =  async (type,message) =>{
    }
 }
 
-const saveStockPositions = async (stkPositions,userObj) =>{
+const saveStockPositions = async (stkPositions,userObj,stkSym) =>{
   try {
     let userId = await getUserDataForOps(userObj)
-    await publishMessage("USER_STOCK_POSITIONS",{position:stkPositions,userId:userId})
+    await publishMessage("USER_STOCK_POSITIONS",{position:stkPositions,userId:userId,stock:stkSym})
   }catch (error) {
     console.error('Error in saveStockPositions function:', error);
-}
+  }
 }
 
-module.exports = {getDashboardOptions,saveStockPositions}
+const deleteStockPositions = async (stkPositions,userObj,stkSym) =>{
+  try {
+    let userId = await getUserDataForOps(userObj)
+    await publishMessage("DEL_USER_STOCK_POSITIONS",{position:stkPositions,userId:userId,stock:stkSym})
+  }catch (error) {
+    console.error('Error in deleteStockPositions function:', error);
+  }
+  
+}
+
+const getExistingPortfolioPositions = async (userObj,stkSym) => {
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var usrPrflio = models.userportfolio
+  let response = []
+  try{
+    let userId = await getUserDataForOps(userObj)
+    await usrPrflio.findAll({where: {
+        symbol: {
+          [Op.eq] : stkSym
+        },iduserprofile: {
+          [Op.eq] : userId
+        }
+      }
+    }).then(data => response = data) 
+  }catch (err){
+      console.log("error in function - getExistingPositions",err)
+  }
+  return response
+}
+
+module.exports = {getDashboardOptions,saveStockPositions,deleteStockPositions,getExistingPortfolioPositions}
