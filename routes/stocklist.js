@@ -3,13 +3,16 @@ const urlconf = new URLConfig()
 const URL_HOST = urlconf.HOST
 
 module.exports = (app,ensureAuthenticated) => {
-  app.get('/api/stocks', async (req, res) => {
+  app.get('/api/stocks', ensureAuthenticated, async (req, res) => {
     const fetch = require("node-fetch");
-    let response
+    let response = []
     try{
-      await fetch(URL_HOST + 'Stk')
-      .then(res => res.json())
-      .then(json => {response=json});
+      const getallstocks = require('../server/stockmaster');
+      console.log("req.params.stkList",req.query.stkList.split(","))
+      let stocks = req.query.stkList.split(",")
+      if(stocks && stocks.length > 0){
+        response = await getallstocks.getStockDetailsForList(stocks)
+      }
     }
     catch (err){
       console.log(err)

@@ -45,6 +45,40 @@ const getUserDataForOps = async (userObj) =>{
   return userIdreturn
 }
 
+const getStockDetailsForList = async (listOfStks) =>{
+    let arrstocklist = []
+    try {
+          for (let i=0;i<listOfStks.length;i++){
+            let stockobj = {}
+            let myCache = require('../servercache/cacheitems')
+            let stkDtlsFromCache = myCache.getCache("STOCK_BASIC_DETAILS_" + listOfStks[i])
+            if (stkDtlsFromCache){
+              console.log("found in cache STOCK_BASIC_DETAILS_" + listOfStks[i])
+              stockobj = stkDtlsFromCache
+            }else{
+              stockobj.symbol = listOfStks[i]
+              let retfromextsite = await getperchange(listOfStks[i])
+              stockobj.perchange = retfromextsite.perchange
+              stockobj.close = retfromextsite.latestprice
+              stockobj.avgdayvol3mon = retfromextsite.avgdayvol3mon
+              stockobj.avgdayvol10day = retfromextsite.avgdayvol10day
+              stockobj.volume = retfromextsite.volume
+              stockobj.itemKey = listOfStks[i]
+              stockobj.key = listOfStks[i]  
+              if (stockobj){
+                let cacheset = myCache.setCacheWithTtl("STOCK_BASIC_DETAILS_" + listOfStks[i],stockobj,60)
+              }      
+            }
+            arrstocklist.push(stockobj)
+          }
+          arrstocklist.sort((a, b) => Math.abs(b.perchange) - Math.abs(a.perchange))
+        }
+      catch (error) {
+        console.error('Error in getStockDetailsForList function:', error);
+    }
+    return arrstocklist
+}
+
 const getStockLists = async (userObj,noCache) => {
     let dbresponse = ''
     let arrstocklist = []
@@ -610,4 +644,4 @@ const getCompanyDetails = async (stkSym) =>{
 
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
-                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,getCompanyDetails};
+                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,getCompanyDetails,getStockDetailsForList};
