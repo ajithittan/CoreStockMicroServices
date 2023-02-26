@@ -12,5 +12,20 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
+      app.get('/api/v2/multinews', ensureAuthenticated, async (req, res) => {
+        const stkNews = require('../server/stocknews')
+        let response  = {}
+        try{
+          console.log("req.params.stkList in news",req.query.stkList.split(","))
+          let stocks = req.query.stkList.split(",")
+          if(stocks && stocks.length > 0){
+            response = await stkNews.getMultipleStockNews(stocks)
+          }   
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
   }
   
