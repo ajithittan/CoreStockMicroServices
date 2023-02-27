@@ -79,6 +79,26 @@ const getStockDetailsForList = async (listOfStks) =>{
     return arrstocklist
 }
 
+const getstockquotesformulstks = async (stkList,limitNum) => {
+  const si = require("stock-info");
+  let response = []
+  try{
+    if (stkList && stkList.length > 0){
+      await si.getStocksInfo(stkList).then(retval => response = getLimitedStocksFromObj(retval,limitNum));
+    }
+  }catch (err){
+    console.log("ERROR - in function getstockquotesformulstks", err)
+  }
+  console.log("getstockquotesformulstks",response)
+  return response.map(item => item.symbol)
+}
+
+const getLimitedStocksFromObj = (respFromExt,limitNum) =>{
+  let result = respFromExt.sort((a,b) => Math.abs(b.regularMarketChange) - Math.abs(a.regularMarketChange))
+  console.log("getLimitedStocksFromObj",result)
+  return result.splice(0,limitNum)
+}
+
 const getStockLists = async (userObj,noCache) => {
     let dbresponse = ''
     let arrstocklist = []
@@ -644,4 +664,5 @@ const getCompanyDetails = async (stkSym) =>{
 
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
-                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,getCompanyDetails,getStockDetailsForList};
+                savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,
+                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks};

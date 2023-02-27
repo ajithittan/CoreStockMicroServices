@@ -19,6 +19,22 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response);
   });
+  app.get('/api/stocks/limit/:numberofstks', ensureAuthenticated, async (req, res) => {
+    const fetch = require("node-fetch");
+    let response = []
+    try{
+      const getallstocks = require('../server/stockmaster');
+      console.log("req.params.stkList",req.query.stkList.split(","))
+      let stocks = req.query.stkList.split(",")
+      if(stocks && stocks.length > 0){
+        response = await getallstocks.getstockquotesformulstks(stocks,parseInt(req.params.numberofstks))
+      }
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
   app.get('/api/stocks/v2',ensureAuthenticated, async (req, res) => {
     console.log('made it in v2?')
     const fetch = require("node-fetch");

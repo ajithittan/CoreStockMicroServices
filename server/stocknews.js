@@ -91,7 +91,6 @@ const getBingNews = async(stkSym) => {
         .then(res => res.json())
         .then(json => {response=json});  
 
-        console.log("response from bing",response,stkSym)
         response = await formatBingNews(response)
         response = response.map(function(item){return {...item,stock:stkSym}})
     }
