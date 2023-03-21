@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const compression = require('compression')
 const session = require('express-session')
+const Redis = require("ioredis");
+const connectRedis = require('connect-redis');
 //const session = require("./middlewares/session/session");
 const passport = require('passport')
 require("./middlewares/userPassport")(passport)
@@ -17,8 +19,20 @@ app.use(compression({filter: shouldCompress}))
 app.use(express.urlencoded({ extended: true}));
 //app.use(session)
 
+const RedisStore = connectRedis(session)
+//Configure redis client
+const redis = new Redis({url:process.env.REDIS_SESSION_STORE});
+
+redis.on('error', function (err) {
+    console.log('Could not establish a connection with redis. - ' + err);
+});
+redis.on('connect', function (err) {
+    console.log('Connected to redis successfully');
+});
+
 app.use(
   session({
+    store: new RedisStore({ client: redis }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,

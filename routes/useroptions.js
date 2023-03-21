@@ -51,5 +51,17 @@ module.exports = (app,ensureAuthenticated) => {
       }
       return res.status(200).send(response);
     });
+    app.get('/api/usernotifications/:type',ensureAuthenticated, async (req, res) => {
+      const fetch = require("node-fetch");
+      const useroptions = require('../server/userdrivenoptions');
+      let response = {}
+      try{
+        response = await useroptions.getUserNotifications(req.user,req.params.type.trim())
+      }
+      catch (err){
+        console.log(err)
+      }
+      return res.status(200).send(response);
+    });
   }
   

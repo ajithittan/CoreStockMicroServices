@@ -131,4 +131,36 @@ const getExistingPortfolioPositions = async (userObj,stkSym) => {
   return response
 }
 
-module.exports = {getDashboardOptions,saveStockPositions,deleteStockPositions,getExistingPortfolioPositions}
+const getMappedDBValues = (tpAlert,inpVal) =>{
+  const URLConfig = require("../config/map.dbvalues.config");
+  return URLConfig[tpAlert][inpVal]
+}
+
+const getUserNotifications = async (userObj,typeOfNot) => {
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var usrnotifications = models.usernotifications
+  let response = []
+  let whereclause = {}
+  try{
+    let userId = await getUserDataForOps(userObj)
+    if (typeOfNot === "ALL"){
+      whereclause = {iduserprofile: {[Op.eq] : userId}}
+    }else{
+      whereclause = {iduserprofile: {[Op.eq] : userId},
+                     notificationtype: {[Op.eq] : getMappedDBValues("ALERT_TYPE",typeOfNot)}}
+    }
+    await usrnotifications.findAll(
+      {
+        attributes: ['idusernotifications','notificationtype','symbol','notifcationmessage','readstatus','createdt'],
+        where: whereclause
+      }
+    ).then(data => response = data) 
+  }catch (err){
+      console.log("error in function - getUserNotifications",err)
+  }
+  return response
+}
+
+module.exports = {getDashboardOptions,saveStockPositions,deleteStockPositions,getExistingPortfolioPositions
+                  ,getUserNotifications}

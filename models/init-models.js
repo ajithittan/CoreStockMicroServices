@@ -18,6 +18,7 @@ var _usersocialprofile = require("./usersocialprofile")
 var _userprofile = require("./userprofile")
 var _userstockpositions = require("./userstockpositions")
 var _userportfolio = require("./userportfolio")
+var _usernotifications = require("./usernotifications")
 
 function initModels(sequelize) {
   var stockindicatorparams = _stockindicatorparams(sequelize, DataTypes);
@@ -39,6 +40,7 @@ function initModels(sequelize) {
   var userprofile = _userprofile(sequelize, DataTypes);
   var userstockpositions = _userstockpositions(sequelize, DataTypes);
   var userportfolio = _userportfolio(sequelize, DataTypes);
+  var usernotifications = _usernotifications(sequelize, DataTypes);
 
   return {
     stockindicatorparams,
@@ -59,7 +61,8 @@ function initModels(sequelize) {
     usersocialprofile,
     userprofile,
     userstockpositions,
-    userportfolio
+    userportfolio,
+    usernotifications
   };
 }
 module.exports = initModels;
