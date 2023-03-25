@@ -68,6 +68,7 @@ require('./routes/stockstreams')(app,ensureAuthenticated);
 require('./routes/stockpositions')(app);
 require('./routes/useroptions')(app,ensureAuthenticated);
 require('./routes/rssfeeds')(app);
+require('./routes/imageprocess')(app);
 require('./routes/stocknewsfeed')(app,ensureAuthenticated);
 require('./routes/googleauth')(app,passport)
 
