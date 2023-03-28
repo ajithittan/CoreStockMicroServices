@@ -19,15 +19,18 @@ const getAllImagesFromCloudinary = async () =>{
     cloudinary.config({
         cloud_name: process.env.CLOUDINARY_CLOUD_NM,
         api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+        secure: true
       });
 
     await cloudinary.search
         .expression(`resource_type:image AND folder=${process.env.CLOUDINARY_CLOUD_FOLDER}`)
         .sort_by('public_id','desc')
-        .max_results(30)
+        .max_results(100)
         .execute()
         .then(result => retval=result)
+
+    console.log("retval",retval)    
     
     return retval
 }
