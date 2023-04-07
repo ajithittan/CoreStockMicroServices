@@ -1,12 +1,27 @@
 "use strict";
 
+const tranformimages = async (inpval) =>{
+    const cloudinary = require('cloudinary').v2
+    for (let i=0;i<inpval.length-1;i++){
+        console.log(cloudinary.image('PAINTINGS/Week_1-_Subtractive_Glaze_Painting_upfj8b', {transformation: [
+            {width: 150, height: 150, gravity: "face", crop: "thumb"},
+            {radius: 20},
+            {effect: "sepia"},
+            {overlay: "cloudinary_icon_blue", gravity: "south_east", x: 5, y: 5, width: 50, opacity: 60, effect: "brightness:200"},
+            {angle: 10}
+            ]}))
+    }
+}
+
 const formatResponseFromCloudinary = async (inpVal) =>{
 
     let retval = []
 
     if (inpVal && inpVal.resources && inpVal.resources.length > 0){
         let urlsfromsrvc = inpVal.resources
-        retval = urlsfromsrvc.map(item => item.secure_url)         
+        retval = urlsfromsrvc.map(item => {return {url:item.secure_url,width:item.width,height:item.height,id:item.public_id,format:item.format}})
+        //retval = urlsfromsrvc.map(item => item.secure_url.replace("upload/","upload/t_media_lib_thumb/"))         
+        //tranformimages(retval)
     }
 
     return retval
