@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true}));
 
 const RedisStore = connectRedis(session)
 //Configure redis client
-const redis = new Redis({port: 6379,host: "xxxxxxxxxx"});
+const redis = new Redis({port: process.env.REDIS_SESSION_STORE_PORT,host: process.env.REDIS_SESSION_STORE_SERVER});
 
 redis.on('error', function (err) {
     console.log('Could not establish a connection with redis. - ' + err);

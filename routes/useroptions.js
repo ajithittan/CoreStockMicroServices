@@ -63,5 +63,16 @@ module.exports = (app,ensureAuthenticated) => {
       }
       return res.status(200).send(response);
     });
+    app.get('/api/userstkpositions',ensureAuthenticated, async (req, res) => {
+      const useroptions = require('../server/userdrivenoptions');
+      let response = {}
+      try{
+        response = await useroptions.getStockInPortfolio(req.user)
+      }
+      catch (err){
+        console.log(err)
+      }
+      return res.status(200).send(response);
+    });
   }
   

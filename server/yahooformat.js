@@ -10,7 +10,6 @@ const sequelize = new Sequelize(conf.DB, conf.USER, conf.PASSWORD, {
 
 const formatCompanyDetails = async (inpQuote,stkSym) =>{
     let retVal = {}
-    console.log("formatCompanyDetailsformatCompanyDetailsformatCompanyDetailsformatCompanyDetails",inpQuote)
     try {
         let myCache = require('../servercache/cacheitems')
         if (inpQuote){

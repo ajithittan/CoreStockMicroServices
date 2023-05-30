@@ -162,5 +162,25 @@ const getUserNotifications = async (userObj,typeOfNot) => {
   return response
 }
 
+const getStockInPortfolio = async (userObj) => {
+
+  let dbresponse = []
+
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var usrStkPos = models.userstockpositions
+  let stkMaster = require("./stockmaster")
+  let userDetails = await stkMaster.getUserDataForOps(userObj)
+
+  await usrStkPos.findAll({where: {
+    iduserprofile: {
+      [Op.eq] : userDetails
+    }
+  }}).then(data => dbresponse=data[0]?.positions || []) 
+
+  return dbresponse
+
+}
+
 module.exports = {getDashboardOptions,saveStockPositions,deleteStockPositions,getExistingPortfolioPositions
-                  ,getUserNotifications}
+                  ,getUserNotifications,getStockInPortfolio}

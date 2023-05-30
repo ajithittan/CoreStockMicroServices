@@ -17,7 +17,8 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
             await fetch(URL_HOST + 'pricetrends/' + stksym + '/' + stkdur)
             .then(res => res.json())
             .then(json => {response=json});  
-            myCache.setCacheWithTtl("STOCK_QUOTES_" + stksym + "_" + stkdur,response,6000)  
+            console.log("getStockPricesForDuration",stksym,stkdur)
+            response?.length > 0 ? myCache.setCacheWithTtl("STOCK_QUOTES_" + stksym + "_" + stkdur,response,6000) : null
         }
     }
     catch (err){
@@ -26,4 +27,40 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
     return response
 }
 
-module.exports={getStockPricesForDuration}
+const getLatestStockQuote = async (stkSym) =>{
+    //should abstract the class above....
+    const yahooFinance = require('yahoo-finance');
+    const qtFormatter = require('./stocksourceformatter')
+    let latStkQuote = {}
+    latStkQuote.status = false
+
+    let myCache = require('../servercache/cacheitems')
+
+    let cacheVal = myCache.getCache("LATEST_STOCK_QUOTE" + stkSym)
+
+    if (cacheVal){
+        latStkQuote = cacheVal
+        console.log("found cached value for getValidityOfStock",cacheVal)
+    }else{
+        await yahooFinance.quote({
+        symbol: stkSym,
+        modules: ['price']       // optional; default modules.
+        }).then(quote => {
+                            if(quote.price.longName){
+                                console.log("quote",quote)
+                                latStkQuote.status = true,
+                                latStkQuote.perchange = parseFloat(quote.price.regularMarketChangePercent),
+                                latStkQuote.latestprice=parseFloat(quote.price.regularMarketPrice),
+                                latStkQuote.avgdayvol3mon = parseFloat(quote.price.averageDailyVolume3Month),
+                                latStkQuote.avgdayvol10day = parseFloat(quote.price.averageDailyVolume10Day),
+                                latStkQuote.volume = parseFloat(quote.price.regularMarketVolume)
+                            }
+                        }
+                ).catch(err => console.log("there is an error",err));
+
+        myCache.setCacheWithTtl("LATEST_STOCK_QUOTE" + stkSym,latStkQuote,30)            
+    }          
+  return latStkQuote
+}
+
+module.exports={getStockPricesForDuration,getLatestStockQuote}

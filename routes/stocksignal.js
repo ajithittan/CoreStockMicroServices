@@ -91,15 +91,14 @@ module.exports = (app) => {
         await fetch(URL_HOST + 'pricetrends/indicatorsatclose/' + req.params.stksym + '/' + req.params.stkInd + '/' + defaultDur)
         .then(res => res.json())
         .then(json => {response=json})
-        
-        if (response.message){
+        if (response.message || response?.length === 0){
           throw 'Error from backend';
         }else{
           myCache.setCache(req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur,response)
         }
       }
       else{
-        console.log("found in cache...../api/stocksignals/indicators")
+        console.log("found in cache...../api/stocksignals/indicators",req.params.stksym,req.params.stkInd)
       }
     }
     catch (err){
@@ -209,6 +208,8 @@ module.exports = (app) => {
                     req.params.indType + '/' + req.params.indVal + '/' + req.params.stkdur)
         .then(res => res.json())
         .then(json => {response=json})
+
+        console.log("in here - for indicators cache",response)
         
         if (response.message){
           throw 'Error from backend';

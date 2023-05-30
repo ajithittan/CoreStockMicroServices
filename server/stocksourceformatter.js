@@ -2,7 +2,6 @@
 
 const formatQuote = (inpQuoteDetails) =>{
     //this will change when other sources get added.
-    console.log("inpQuoteDetails",inpQuoteDetails)
     return formatYahooQuote(inpQuoteDetails)
 }
 

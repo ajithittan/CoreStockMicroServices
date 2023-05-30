@@ -159,15 +159,14 @@ const getStockLists = async (userObj,noCache) => {
 //ask: 113.62,
 
 const getperchange = async (stksym) => {
-  let perchange = 0
-  let latestprice = 0
   let stockdtls = {}
-  const stkInfo = require('stock-info');
-  await stkInfo.getSingleStockInfo(stksym).then(retData => {stockdtls.perchange = parseFloat(retData.regularMarketChangePercent)
-            ,stockdtls.latestprice=parseFloat(retData.regularMarketPrice),
-            stockdtls.avgdayvol3mon = parseFloat(retData.averageDailyVolume3Month),
-            stockdtls.avgdayvol10day = parseFloat(retData.averageDailyVolume10Day),
-            stockdtls.volume = parseFloat(retData.regularMarketVolume)});
+  const stkInfo = require("./stockquotes");
+  //let retval = await getValidityOfStock(stksym)
+  try{
+    stockdtls = await stkInfo.getLatestStockQuote(stksym)
+  }catch (error){
+    console.log("error in getperchange ",error)
+  }
   return stockdtls 
 }
 
@@ -464,16 +463,12 @@ const getAllStockSectors= async () =>{
  const getAllPosStks = async () =>{
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize);
-  var stocklist = models.stocklist
+  var stkPos = models.userstockpositions
   let dbresponse = []
 
-  await stocklist.findAll({where: {
-    track: {
-      [Op.eq] : 1
-    }
-  }}).then(data => dbresponse=data) 
+  await stkPos.findAll().then(data => dbresponse=data) 
 
-  return(dbresponse.map(item => item.symbol))
+  return(dbresponse.map(item => item.positions).flat(1))
 
  }
 
@@ -582,7 +577,7 @@ const getAllStockSectors= async () =>{
             [Op.eq] : userId
           }
         }}).then(data => currpos=data) 
-        console.log("positions......",currpos,removeStk)
+        console.log("in deleteStkPositions positions......",userId,removeStk)
         currpos = currpos[0].positions.filter(item => item != removeStk)
 
         if (currpos.length === 0 ){
@@ -644,7 +639,7 @@ const getCompanyDetails = async (stkSym) =>{
 
   if (cacheVal){
     retval = cacheVal
-    console.log("found cached value for company details",cacheVal)
+    console.log("found cached value for company details",stkSym)
   }else{
     const yahooFinance = require('yahoo-finance');
     const yahFormat = require('./yahooformat')
@@ -656,7 +651,7 @@ const getCompanyDetails = async (stkSym) =>{
       .catch(err => console.log("there is an error",err));
 
       retval = await yahFormat.formatCompanyDetails(retfromyahoo,stkSym)
-      console.log("retval",retval)
+      console.log("getCompanyDetails",stkSym)
   }
           
   return retval
@@ -665,4 +660,4 @@ const getCompanyDetails = async (stkSym) =>{
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
                 savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,
-                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks};
+                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps};

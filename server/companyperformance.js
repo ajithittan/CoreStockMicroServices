@@ -59,7 +59,7 @@ const getCompanyPerfFromYahoo = async (stkSym) =>{
         .catch(err => console.log("there is an error",err));
 
     retval = await yahFormat.formatCompanyQtrPerf(retfromyahoo,stkSym)
-    console.log("retval",retval)
+    console.log("getCompanyPerfFromYahoo",stkSym)
           
     return retval
 }
@@ -76,10 +76,10 @@ const getCompanyQtrPerf = async (stkSym,forChart) =>{
   
     if (cacheVal){
       retval = cacheVal
-      console.log("found cached value for company details",cacheVal)
+      console.log("found cached value for company details",stkSym)
     }else{
         retval = await getCompanyPerfFromYahoo(stkSym)
-        console.log("retval",retval)
+        console.log("getCompanyQtrPerf",stkSym)
         myCache.setCacheWithTtl("COMPANY_QTR_PERF" + stkSym,retval,60000)
     }
             
