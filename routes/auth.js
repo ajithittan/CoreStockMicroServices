@@ -13,4 +13,14 @@ module.exports = (app,ensureAuthenticated) => {
       res.status(200).send(true);
     });
   });
+  app.get('/api/auth/session/',ensureAuthenticated, async (req, res) => {
+    var masterstkops = require('../server/stockmaster');
+    try{
+      response = await masterstkops.getUserDataForOps(req.user)
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send({sessionUserId:response});
+  });
 }

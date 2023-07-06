@@ -4,7 +4,7 @@ const URL_HOST = urlconf.HOST
 
 const getStockPricesForDuration = async (stksym,stkdur) =>{
     let response = {}
-    const fetch = require("node-fetch");
+    //const fetch = require("node-fetch");
 
     let myCache = require('../servercache/cacheitems')
     let cacheVal = myCache.getCache("STOCK_QUOTES_" + stksym + "_" + stkdur)
@@ -14,6 +14,7 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
             console.log("found STOCK_QUOTES_ incache")
             response = cacheVal
         }else{
+            console.log("in here fetch?")
             await fetch(URL_HOST + 'pricetrends/' + stksym + '/' + stkdur)
             .then(res => res.json())
             .then(json => {response=json});  
