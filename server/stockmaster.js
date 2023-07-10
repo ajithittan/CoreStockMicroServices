@@ -390,9 +390,8 @@ const getAllStockSectors= async () =>{
   let stkliks = new Set([...sector.stocks])
   try{
     let userId = await getUserDataForOps(userObj)
-    await stocksector.create({'sector':sector.sector,'stocks':Array.from(stkliks),'iduserprofile':userId})
+    retval = await stocksector.create({'sector':sector.sector,'stocks':Array.from(stkliks),'iduserprofile':userId})
     await publishMessage("STOCK_EOD_PRICES",{stocks:Array.from(stkliks)})
-    retval = true
   }catch(error){
     console.log("createStockSectors - Error when creating sector",error)
   }
@@ -657,7 +656,27 @@ const getCompanyDetails = async (stkSym) =>{
   return retval
 }
 
+const getAllStocks = async () =>{
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stkList = models.stocksymbols
+  let dbresponse = []
+  let myCache = require('../servercache/cacheitems')
+
+  let cacheVal = myCache.getCache("FULL_STOCK_LIST")
+
+  if (cacheVal){
+    dbresponse = cacheVal
+    console.log("found cached value for getAllStocks")
+  }else{
+    console.log("Getting all stocks from DB - getAllStocks")
+    await stkList.findAll({attributes: ['symbol','companyname']}).then(data => dbresponse=data).catch(err => console.log("ERROR - getAllStocks",err));
+    myCache.setCacheWithTtl("FULL_STOCK_LIST",dbresponse,3600)            
+  }         
+  return(dbresponse)
+ }
+
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
                 savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,
-                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps};
+                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps,getAllStocks};

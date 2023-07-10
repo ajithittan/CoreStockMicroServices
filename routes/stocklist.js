@@ -116,7 +116,18 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response);
   });
-
+  app.get('/api/allstocks', ensureAuthenticated, async (req, res) => {
+    let response = []
+    try{
+      const getallstocks = require('../server/stockmaster');
+      response = await getallstocks.getAllStocks()
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
+/*
   //Below code is not working...not sure why the routing is not being detected...
   app.get('/api/stocks/dashboard/:stksym', async (req, res) => {
     try{
@@ -130,4 +141,5 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response);
   });
+  */
 }
