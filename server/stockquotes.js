@@ -4,7 +4,7 @@ const URL_HOST = urlconf.HOST
 
 const getStockPricesForDuration = async (stksym,stkdur) =>{
     let response = {}
-    //const fetch = require("node-fetch");
+    const fetch = require("node-fetch");
 
     let myCache = require('../servercache/cacheitems')
     let cacheVal = myCache.getCache("STOCK_QUOTES_" + stksym + "_" + stkdur)

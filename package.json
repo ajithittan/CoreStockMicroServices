@@ -33,6 +33,7 @@
     "mongoose": "^5.13.16",
     "mysql2": "^2.2.5",
     "node-cache": "^5.1.2",
+    "node-fetch": "^2.6.1",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "redis": "^4.3.1",
