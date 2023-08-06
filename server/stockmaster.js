@@ -357,8 +357,9 @@ const getStockSectorsfromDB = async (user) =>{
         where: {
           iduserprofile: {
                 [Op.eq] : user
-        }
-        }
+          }
+        },
+        order: sequelize.col('sector')
       }).then(data => dbresponse=(data))
     } catch (error) {
       console.log("getStockSectorsfromDB - Error",error)
