@@ -214,4 +214,17 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
+      app.get('/api/v2/companystats/:stattype/:stksym/:years/:repType', ensureAuthenticated, async (req, res) => {
+        const fetch = require("node-fetch");
+        let response
+        try{
+          await fetch(URL_HOST + 'extsrcs/companyfacts/' + req.params.stattype + '/' + req.params.stksym + '/' + req.params.repType + '/' + req.params.years)
+          .then(res => res.json())
+          .then(json => {response=json});
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });      
   }
