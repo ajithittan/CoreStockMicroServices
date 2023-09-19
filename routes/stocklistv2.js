@@ -226,5 +226,18 @@ module.exports = (app,ensureAuthenticated) => {
           console.log(err)
         }
         return res.status(200).send(response);
+      });   
+      app.get('/api/v2/companystats/allfacts', ensureAuthenticated, async (req, res) => {
+        const fetch = require("node-fetch");
+        let response
+        try{
+          await fetch(URL_HOST + 'extsrcs/companyfacts/allfacts')
+          .then(res => res.json())
+          .then(json => {response=json});
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
       });      
   }
