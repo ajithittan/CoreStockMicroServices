@@ -240,4 +240,18 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });      
+      app.get('/api/v2/rawcompanystats/:stattype/:stksym/:reptype', ensureAuthenticated, async (req, res) => {
+        console.log("HERE?")
+        const fetch = require("node-fetch");
+        let response
+        try{
+          await fetch(URL_HOST + 'extsrcs/companyfacts/fact/' + req.params.stattype + '/' + req.params.stksym + '/' + req.params.reptype )
+          .then(res => res.json())
+          .then(json => {response=json});
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });      
   }
