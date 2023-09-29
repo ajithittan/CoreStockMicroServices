@@ -253,5 +253,20 @@ module.exports = (app,ensureAuthenticated) => {
           console.log(err)
         }
         return res.status(200).send(response);
-      });      
+      });  
+      app.post('/api/v2/companystats/updfacts', ensureAuthenticated, async (req, res) => {
+        console.log("HERE?")
+        const fetch = require("node-fetch");
+        let response
+        try{
+          await fetch(URL_HOST + 'extsrcs/companyfacts/updfacts', {method:'post', body:JSON.stringify(req.body), 
+          headers: { 'Content-Type': 'application/json' }})
+          .then(res => res.json())
+          .then(json => {response=json});
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });    
   }
