@@ -218,7 +218,7 @@ module.exports = (app,ensureAuthenticated) => {
         const fetch = require("node-fetch");
         let response
         try{
-          await fetch(URL_HOST + 'extsrcs/companyfacts/' + req.params.stattype + '/' + req.params.stksym + '/' + req.params.repType + '/' + req.params.years)
+          await fetch(URL_HOST + 'company/bytype/' + req.params.stattype + '/' + req.params.stksym + '/' + req.params.repType)
           .then(res => res.json())
           .then(json => {response=json});
         }
@@ -269,4 +269,21 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });    
+      app.post('/api/v2/companystats/addsecdata/:stksym', ensureAuthenticated, async (req, res) => {
+        const fetch = require("node-fetch");
+        let response
+        try{
+          await fetch(URL_HOST + 'extsrcs/companyfacts/recordallfacts/' + req.params.stksym , 
+          {
+            method:'post', 
+            headers: { 'Content-Type': 'application/json' }
+          })
+          .then(res => res.json())
+          .then(json => {response=json});
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });          
   }
