@@ -127,6 +127,28 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response);
   });
+  app.post('/api/stockquotes/bulk', async (req, res) => {
+    var stkquotes = require('../server/stockquotes');
+    let response
+    try{
+      response = await stkquotes.updateStockQuotesBulk(req.body)
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
+  app.get('/api/stockquotes/bulk', async (req, res) => {
+    let response = []
+    try{
+      var stkquotes = require('../server/stockquotes');
+      response = await stkquotes.getStockQuotesBulk()
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
 /*
   //Below code is not working...not sure why the routing is not being detected...
   app.get('/api/stocks/dashboard/:stksym', async (req, res) => {

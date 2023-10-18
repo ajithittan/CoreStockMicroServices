@@ -64,4 +64,16 @@ const getLatestStockQuote = async (stkSym) =>{
   return latStkQuote
 }
 
-module.exports={getStockPricesForDuration,getLatestStockQuote}
+const updateStockQuotesBulk = async (inpQuotes) =>{
+    let myCache = require('../servercache/cacheitems')
+    myCache.setCacheWithTtl("BULK_STOCK_QUOTE",inpQuotes,10000)
+    return true
+}
+
+const getStockQuotesBulk = async () =>{
+    let myCache = require('../servercache/cacheitems')
+    return myCache.getCache("BULK_STOCK_QUOTE")
+}
+
+
+module.exports={getStockPricesForDuration,getLatestStockQuote,updateStockQuotesBulk,getStockQuotesBulk}
