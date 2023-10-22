@@ -64,15 +64,15 @@ const getLatestStockQuote = async (stkSym) =>{
   return latStkQuote
 }
 
-const updateStockQuotesBulk = async (inpQuotes) =>{
+const updateStockQuotesBulk = async (inpQuotes,typeOfQuote) =>{
     let myCache = require('../servercache/cacheitems')
-    myCache.setCacheWithTtl("BULK_STOCK_QUOTE",inpQuotes,10000)
+    myCache.setCacheWithTtl("BULK_STOCK_QUOTE_" + typeOfQuote,inpQuotes,10000)
     return true
 }
 
-const getStockQuotesBulk = async () =>{
+const getStockQuotesBulk = async (typeOfQuote) =>{
     let myCache = require('../servercache/cacheitems')
-    return myCache.getCache("BULK_STOCK_QUOTE")
+    return myCache.getCache("BULK_STOCK_QUOTE_" + typeOfQuote)
 }
 
 

@@ -127,22 +127,22 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response);
   });
-  app.post('/api/stockquotes/bulk', async (req, res) => {
+  app.post('/api/stockquotes/bulk/:typeOfQuote', async (req, res) => {
     var stkquotes = require('../server/stockquotes');
     let response
     try{
-      response = await stkquotes.updateStockQuotesBulk(req.body)
+      response = await stkquotes.updateStockQuotesBulk(req.body,req.params.typeOfQuote)
     }
     catch (err){
       console.log(err)
     }
     return res.status(200).send(response);
   });
-  app.get('/api/stockquotes/bulk', async (req, res) => {
+  app.get('/api/stockquotes/bulk/:typeOfQuote', async (req, res) => {
     let response = []
     try{
       var stkquotes = require('../server/stockquotes');
-      response = await stkquotes.getStockQuotesBulk()
+      response = await stkquotes.getStockQuotesBulk(req.params.typeOfQuote)
     }
     catch (err){
       console.log(err)
