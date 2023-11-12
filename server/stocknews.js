@@ -11,41 +11,8 @@ const sequelize = new Sequelize(conf.DB, conf.USER, conf.PASSWORD, {
     dialect: conf.dialect
   })
 
-const getUserDataForOps = async (userObj) =>{
-
-  var initModels = require("../models/init-models"); 
-  var models = initModels(sequelize);
-  var usrtable = models.userprofile
-  let userProf = {}
-  let userIdreturn = 0
-  let myCache = require('../servercache/cacheitems')
-  
-  try{
-    console.log("cached value - ",myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid))
-    if (myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid)){
-      userIdreturn = myCache.getCache("USER_OBJECT_FOR_ID" + userObj.usrid).iduserprofile
-      console.log("userIdreturn",userIdreturn)
-    }
-    else{
-        await usrtable.findAll({where: {
-          uniqueUUID: {
-                    [Op.eq] : userObj.usrid
-                }
-            },raw : true
-        }).then(data => userProf=data)
-        userIdreturn = userProf[0].iduserprofile
-        myCache.setCacheWithTtl("USER_OBJECT_FOR_ID" + userObj.usrid,userProf[0],120)
-    }
-  }
-  catch(error){
-    console.log("error in getUserDataForOps",error)
-  }
-
-  return userIdreturn
-}
-
-const getStockNews = async (stkSym) =>{
-    let newsResp = {}
+const getStockNews = async (stkSym,limitOfNews) =>{
+    let newsResp = []
     let myCache = require('../servercache/cacheitems')
     let cacheVal = myCache.getCache("NEWS_STOCK_BING_" + stkSym)
 
@@ -60,18 +27,20 @@ const getStockNews = async (stkSym) =>{
         }
         myCache.setCacheWithTtl("NEWS_STOCK_BING_" + stkSym,newsResp,3000)  
       }
-      return newsResp
+      return newsResp.slice(0,limitOfNews)
 }
 
-const getMultipleStockNews = async (arrStks) => {
+const getMultipleStockNews = async (arrStks,limitOfNews) => {
+  const moment = require("moment");
   let arrnewsResp = []
   let promisesfornews = []
   for (let i=0;i < arrStks.length;i++){
-        promisesfornews.push(getStockNews(arrStks[i]))
+        promisesfornews.push(getStockNews(arrStks[i],limitOfNews))
         await Promise.all(promisesfornews)
                       .then(result => arrnewsResp = removeDuplicateNews([].concat(...result)))
-                      .catch(err => console.log("newsfeed error",err))
+                      .catch(err => console.log("getMultipleStockNews - newsfeed error",err))
     }
+    arrnewsResp = arrnewsResp.sort((a,b) => moment(b.date).diff(a.date))
     return arrnewsResp
 }
 
@@ -81,14 +50,19 @@ const removeDuplicateNews = (inpData) => {
 }
 
 const formatFinnHubNews = (inpNews) => {
-  let slicedNews = inpNews.slice(0,50)
-  return slicedNews.map(item => {return {"title":item.headline,"link":item.url,"date":item.datetime,"stock":item.related}})
+  const moment = require("moment");
+  let slicedNews = inpNews.slice(0,25)
+  return slicedNews.map(item => {return {"title":item.headline,"link":item.url,"date":moment(item.datetime*1000).format(),
+  "stock":item.related,"summary":item.summary,"source":item.source}})
 }
 
 const getFinnHubNews = async(stkSym) => {
+    const moment = require("moment");
     let response = []
+    let dateTo = moment().format('YYYY-MM-DD');
+    let dateFrom = moment().subtract(10,'d').format('YYYY-MM-DD');
     const fetch = require("node-fetch");
-    let finURL = "https://finnhub.io/api/v1/company-news?symbol="+stkSym+"&from=2023-08-15&to=2023-11-11&token="+process.env.FINN_HUB_APIKEY
+    let finURL = "https://finnhub.io/api/v1/company-news?symbol="+stkSym+"&from=" + dateFrom + "&to=" + dateTo + "&token="+process.env.FINN_HUB_APIKEY
     try{
         await fetch(finURL)
         .then(res => res.json())
@@ -144,11 +118,13 @@ const getNameToBuildQuery = async (stkSym) =>{
 }
 
 const formatBingNews = async (bingNews) =>{
+    const moment = require("moment");
     let formattedresp = []
     if (bingNews.value){
         for (let i=0;i<bingNews.value.length;i++){
             formattedresp.push({title:bingNews.value[i].name,link:bingNews.value[i].url,
-                                date:bingNews.value[i].datePublished})
+                                date:moment(bingNews.value[i].datePublished).format(),summary:bingNews.value[i].description,
+                                source:bingNews.value[i].provider[0]?.name})
         }
     }
     return formattedresp
