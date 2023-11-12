@@ -127,6 +127,7 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response);
   });
+  //delete the below items since its moved to realtime package.
   app.post('/api/stockquotes/bulk/:typeOfQuote', async (req, res) => {
     var stkquotes = require('../server/stockquotes');
     let response

@@ -19,7 +19,7 @@ module.exports = (app,ensureAuthenticated) => {
           console.log("req.params.stkList in news",req.query.stkList.split(","))
           let stocks = req.query.stkList.split(",")
           if(stocks && stocks.length > 0){
-            response = await stkNews.getMultipleStockNews(stocks)
+            await stkNews.getMultipleStockNews(stocks).then(retval => response=retval)
           }   
         }
         catch (err){

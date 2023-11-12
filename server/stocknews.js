@@ -53,29 +53,51 @@ const getStockNews = async (stkSym) =>{
         newsResp = cacheVal
         console.log("found news in cache for - ",stkSym)
       }else{
-        newsResp = await getBingNews (stkSym)
+        newsResp = await getFinnHubNews (stkSym)
+        if (newsResp.length === 0){
+          console.log("finnhub failed so going to Bing News")
+          newsResp = await getBingNews (stkSym)
+        }
         myCache.setCacheWithTtl("NEWS_STOCK_BING_" + stkSym,newsResp,3000)  
       }
-
       return newsResp
 }
 
 const getMultipleStockNews = async (arrStks) => {
   let arrnewsResp = []
-  let myCache = require('../servercache/cacheitems')
-
-      for (let i=0;i < arrStks.length;i++){
-        let cacheVal = myCache.getCache("NEWS_STOCK_BING_" + arrStks[i])
-        if (cacheVal){
-          arrnewsResp.push(...cacheVal)
-        }else{
-          newsResp = await getBingNews (arrStks[i])
-          arrnewsResp.push(...newsResp)
-          myCache.setCacheWithTtl("NEWS_STOCK_BING_" + arrStks[i],newsResp,3000)      
-        }
-      }
-
+  let promisesfornews = []
+  for (let i=0;i < arrStks.length;i++){
+        promisesfornews.push(getStockNews(arrStks[i]))
+        await Promise.all(promisesfornews)
+                      .then(result => arrnewsResp = removeDuplicateNews([].concat(...result)))
+                      .catch(err => console.log("newsfeed error",err))
+    }
     return arrnewsResp
+}
+
+const removeDuplicateNews = (inpData) => {
+  const _ = require('lodash')
+  return _.uniqBy(inpData, 'title')
+}
+
+const formatFinnHubNews = (inpNews) => {
+  let slicedNews = inpNews.slice(0,50)
+  return slicedNews.map(item => {return {"title":item.headline,"link":item.url,"date":item.datetime,"stock":item.related}})
+}
+
+const getFinnHubNews = async(stkSym) => {
+    let response = []
+    const fetch = require("node-fetch");
+    let finURL = "https://finnhub.io/api/v1/company-news?symbol="+stkSym+"&from=2023-08-15&to=2023-11-11&token="+process.env.FINN_HUB_APIKEY
+    try{
+        await fetch(finURL)
+        .then(res => res.json())
+        .then(json => {response=formatFinnHubNews(json)});  
+    }
+    catch (err){
+      console.log(err)
+    }
+    return response
 }
 
 const getBingNews = async(stkSym) => {
@@ -83,9 +105,6 @@ const getBingNews = async(stkSym) => {
     const encodedValue = encodeURIComponent(await getNameToBuildQuery(stkSym))
     let header = {"Ocp-Apim-Subscription-Key":process.env.BING_SECRET_KEY}
     let response = {}
-
-    console.log("encodedValue",encodedValue)
-
     try{
         await fetch(urlconf.BING_NEWS + '?count=25&q=' + encodedValue, {method: 'GET', headers:header})
         .then(res => res.json())
@@ -104,7 +123,7 @@ const getBingNews = async(stkSym) => {
 const getNameToBuildQuery = async (stkSym) =>{
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize);
-  var stocklist = models.stocklist
+  var stockcik = models.stockcik
   let dbresponse = []
   let myCache = require('../servercache/cacheitems')
   let cacheVal = myCache.getCache("STOCK_DEFINITION_" + stkSym)
@@ -113,7 +132,7 @@ const getNameToBuildQuery = async (stkSym) =>{
     dbresponse = cacheVal
   }
   else{
-    await stocklist.findAll({where: {
+    await stockcik.findAll({where: {
       symbol: {
         [Op.eq] : stkSym
       }
@@ -121,7 +140,7 @@ const getNameToBuildQuery = async (stkSym) =>{
     myCache.setCacheWithTtl("STOCK_DEFINITION_" + stkSym,dbresponse,60000)  
   }
 
-  return `"${stkSym} stock"` + " OR " + `"${dbresponse[0].name}"`
+  return `"${dbresponse[0].title}"`
 }
 
 const formatBingNews = async (bingNews) =>{

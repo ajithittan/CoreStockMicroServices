@@ -14,7 +14,6 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
             console.log("found STOCK_QUOTES_ incache")
             response = cacheVal
         }else{
-            console.log("in here fetch?")
             await fetch(URL_HOST + 'pricetrends/' + stksym + '/' + stkdur)
             .then(res => res.json())
             .then(json => {response=json});  
