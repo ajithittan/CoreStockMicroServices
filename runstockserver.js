@@ -13,7 +13,7 @@ require('dotenv').config()
 const app = express();
 
 app.disable('x-powered-by');
-app.use(bodyParser.json({limit: '200mb'}));
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(cors())
 app.use(compression({filter: shouldCompress}))
 app.use(express.urlencoded({ extended: true}));
