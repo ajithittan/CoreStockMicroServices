@@ -479,6 +479,7 @@ const getAllStockSectors= async () =>{
     let setOfStks = new Set([...postks,...secStks])
 
     await publishMessage("STOCK_EOD_PRICES",{stocks:[...setOfStks]})
+    await publishMessage("STOCK_LATEST_SEC_DATA",{stocks:[...setOfStks]})
     return true
 
  }
