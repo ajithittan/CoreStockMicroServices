@@ -21,12 +21,20 @@ module.exports = (app,ensureAuthenticated) => {
     });
     app.get('/api/v2/stocks/perchange/:stksym/:stkdur/:rollup/:unit/:byType', async (req, res) => {
       const fetch = require("node-fetch");
-      let response
+      let myCache = require('../servercache/cacheitemsglobal')
+      let response = []
       try{
-        await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' 
-                             + req.params.rollup + '/' + req.params.unit + '/' + req.params.byType)
-        .then(res => res.json())
-        .then(json => {response=json});
+        let cacheKey = "PER_CHANGE_" + req.params.stksym + '_' + req.params.stkdur + '_' + req.params.rollup + '_' + req.params.unit + '_' + req.params.byType 
+        response = await myCache.getCache(cacheKey)
+        if (!response){
+          await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' 
+          + req.params.rollup + '/' + req.params.unit + '/' + req.params.byType)
+            .then(res => res.json())
+            .then(json => {response=json});
+          myCache.setCacheWithTtl(cacheKey,response,36000)   
+        }else{
+          console.log("found in cache - per changes - ",cacheKey)
+        }  
       }
       catch (err){
         console.log(err)

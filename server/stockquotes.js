@@ -6,19 +6,19 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
     let response = {}
     const fetch = require("node-fetch");
 
-    let myCache = require('../servercache/cacheitems')
-    let cacheVal = myCache.getCache("STOCK_QUOTES_" + stksym + "_" + stkdur)
+    let myCache = require('../servercache/cacheitemsglobal')
+    let cacheKey = "STOCK_QUOTES_" + stksym + "_" + stkdur
+    let cacheVal = await myCache.getCache(cacheKey)
 
     try{
         if (cacheVal){
-            console.log("found STOCK_QUOTES_ incache")
+            console.log("found STOCK_QUOTES_ incache",cacheKey)
             response = cacheVal
         }else{
             await fetch(URL_HOST + 'pricetrends/' + stksym + '/' + stkdur)
             .then(res => res.json())
             .then(json => {response=json});  
-            console.log("getStockPricesForDuration",stksym,stkdur)
-            response?.length > 0 ? myCache.setCacheWithTtl("STOCK_QUOTES_" + stksym + "_" + stkdur,response,6000) : null
+            response?.length > 0 ? myCache.setCacheWithTtl(cacheKey,response,6000) : null
         }
     }
     catch (err){
