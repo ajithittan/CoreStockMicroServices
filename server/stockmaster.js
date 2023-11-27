@@ -547,6 +547,17 @@ const getAllStockSectors= async () =>{
 
  }
 
+ const initiateCaching = async (stksym,inpParams) =>{
+    for (let i=0;i<inpParams.length;i++){
+      let objForCache = {}
+      objForCache.processId = inpParams[i].type
+      let allparams = inpParams[i].options
+      allparams.unshift({"value":stksym})
+      objForCache.params = allparams
+      publishMessage("PROCESS_CACHE",{tocache:objForCache})  
+    }
+ }
+
  const publishMessage =  async (type,message) =>{
    let pubMsg = {}
     try{
@@ -555,7 +566,7 @@ const getAllStockSectors= async () =>{
         const fetch = require("node-fetch"); 
         await fetch(urlconf.PUB_MESSAGES, {method:'post', body: JSON.stringify(pubMsg), 
                                           headers: { 'Content-Type': 'application/json' }})
-        .then(res => console.log(res))
+        .then(res => console.log("Message posted to redis queue",type))
     }
     catch (err){
         console.log("error in publishMessage",err)
@@ -681,4 +692,4 @@ const getAllStocks = async () =>{
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
                 savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,
-                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps,getAllStocks};
+                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps,getAllStocks,initiateCaching};

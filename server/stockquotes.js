@@ -7,7 +7,7 @@ const getStockPricesForDuration = async (stksym,stkdur) =>{
     const fetch = require("node-fetch");
 
     let myCache = require('../servercache/cacheitemsglobal')
-    let cacheKey = "STOCK_QUOTES_" + stksym + "_" + stkdur
+    let cacheKey = "STOCKQUOTES_" + stksym + "_" + stkdur
     let cacheVal = await myCache.getCache(cacheKey)
 
     try{

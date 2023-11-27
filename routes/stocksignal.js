@@ -85,9 +85,9 @@ module.exports = (app) => {
     try{
       let defaultDur = 12
       let myCache = require('../servercache/cacheitemsglobal')
-      let cacheKey = "SIGNAL_TOP_INDICATOR_" + req.params.stkInd + '_' + req.params.stksym + '_' + defaultDur
+      let cacheKey = "TOPIND_" + req.params.stksym + '_' + req.params.stkInd + '_' + defaultDur
       response = await myCache.getCache(cacheKey)
-      if (response === undefined){
+      if (!response){
         const fetch = require("node-fetch");
         await fetch(URL_HOST + 'pricetrends/indicatorsatclose/' + req.params.stksym + '/' + req.params.stkInd + '/' + defaultDur)
         .then(res => res.json())
@@ -201,7 +201,7 @@ module.exports = (app) => {
     let response
     try{
       let myCache = require('../servercache/cacheitemsglobal')
-      let cacheKey = req.params.stksym + '_' + req.params.indType + '_' + req.params.indVal + "_" + req.params.stkdur
+      let cacheKey = "IND_" + req.params.stksym + '_' + req.params.indType + '_' + req.params.indVal + "_" + req.params.stkdur
       response = await myCache.getCache(cacheKey)
       if (!response){
         const fetch = require("node-fetch");
@@ -210,7 +210,7 @@ module.exports = (app) => {
         .then(res => res.json())
         .then(json => {response=json})
 
-        console.log("in here - for indicators cache",cacheKey)
+        console.log("Cache miss - ",cacheKey)
         
         if (response.message){
           throw 'Error from backend';

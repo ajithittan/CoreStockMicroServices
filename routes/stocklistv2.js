@@ -24,7 +24,7 @@ module.exports = (app,ensureAuthenticated) => {
       let myCache = require('../servercache/cacheitemsglobal')
       let response = []
       try{
-        let cacheKey = "PER_CHANGE_" + req.params.stksym + '_' + req.params.stkdur + '_' + req.params.rollup + '_' + req.params.unit + '_' + req.params.byType 
+        let cacheKey = "PERCHANGE_" + req.params.stksym + '_' + req.params.stkdur + '_' + req.params.rollup + '_' + req.params.unit + '_' + req.params.byType 
         response = await myCache.getCache(cacheKey)
         if (!response){
           await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stksym + '/' + req.params.stkdur + '/' 
@@ -288,6 +288,17 @@ module.exports = (app,ensureAuthenticated) => {
           })
           .then(res => res.json())
           .then(json => {response=json});
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });      
+      app.post('/api/v2/initiatecaching/:stksym', ensureAuthenticated, async (req, res) => {
+        const stkMaster = require('../server/stockmaster');
+        let response=[]
+        try{
+          response = stkMaster.initiateCaching(req.params.stksym,req.body)
         }
         catch (err){
           console.log(err)
