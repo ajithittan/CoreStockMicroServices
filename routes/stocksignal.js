@@ -2,19 +2,7 @@ const URLConfig = require("../config/url.config.js");
 const urlconf = new URLConfig()
 const URL_HOST = urlconf.HOST
 
-module.exports = (app) => {
-  app.get('/api/stocksignals/:stksym/:stktermtype', async (req, res) => {
-    try{
-      const fetch = require("node-fetch");
-      await fetch(URL_HOST + 'stksignals/whatif/getindssnearprice/' + req.params.stksym + '/' + req.params.stktermtype)
-      .then(res => res.json())
-      .then(json => {response=json});
-    }
-    catch (err){
-      console.log(err)
-    }
-    return res.status(200).send(response);
-  });
+module.exports = (app,ensureAuthenticated) => {
   app.get('/api/stocksignals/perf/:stkstgyid/:stkdur/:stksym', async (req, res) => {
     try{
       const fetch = require("node-fetch");
@@ -80,7 +68,7 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
-  app.get('/api/stocksignals/indicators/:stksym/:stkInd/:stkLast', async (req, res) => {
+  app.get('/api/stocksignals/indicators/:stksym/:stkInd/:stkLast', ensureAuthenticated, async (req, res) => {
     let response
     try{
       let defaultDur = 12
@@ -232,4 +220,17 @@ module.exports = (app) => {
       return res.status(200).send(response)
     }
   });  
+  app.get('/api/stocksignals/suppresistance/:stksym', ensureAuthenticated, async (req, res) => {
+    let response = []
+    try{
+      const fetch = require("node-fetch");
+      await fetch(URL_HOST + 'pricetrends/supportresistance/' + req.params.stksym)
+      .then(res => res.json())
+      .then(json => {response=JSON.parse(json)});
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(({symbol:req.params.stksym, type:"SAR",data:response}))
+  });
 }

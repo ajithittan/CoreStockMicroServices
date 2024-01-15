@@ -60,7 +60,7 @@ require('./routes/auth')(app,ensureAuthenticated);
 require('./routes/stocklist')(app,ensureAuthenticated);
 require('./routes/stockstats')(app);
 require('./routes/stockmaint')(app,ensureAuthenticated);
-require('./routes/stocksignal')(app);
+require('./routes/stocksignal')(app,ensureAuthenticated);
 require('./routes/stocklistv2')(app,ensureAuthenticated);
 require('./routes/stockops')(app);
 require('./routes/stockpredictions')(app);
