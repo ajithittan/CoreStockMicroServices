@@ -484,6 +484,11 @@ const getAllStockSectors= async () =>{
 
  }
 
+ const initiatePatternRecog = async () =>{
+  await publishMessage("INITIATE_PATTERN_RECOG",{})
+  return true
+}
+
  const updStockPrices = async (arrofStks) =>{
 
     let responsefromextsite = await getStockHistDataMultiple([...arrofStks])
@@ -692,4 +697,5 @@ const getAllStocks = async () =>{
 module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists,getStockHistData,getcdlpatterns,getcdlpatternstrack,
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
                 savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,
-                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps,getAllStocks,initiateCaching};
+                getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps,getAllStocks,
+                initiateCaching,initiatePatternRecog};

@@ -59,6 +59,22 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
+  app.post('/api/genpredictions/:stksym', async (req, res) => {
+    const fetch = require("node-fetch");
+    let response
+    try{
+      console.log("req",req.body)
+      await fetch(URL_PREDICTIONS + 'predictions/' + req.params.stksym , 
+                                  {method:'post', body:JSON.stringify(req.body), 
+                                  headers: { 'Content-Type': 'application/json' }})
+      .then(res => res.json())
+      .then(json => {response=json});
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
   app.post('/api/savemodel/:stksym/:model', async (req, res) => {
     const fetch = require("node-fetch");
     let response

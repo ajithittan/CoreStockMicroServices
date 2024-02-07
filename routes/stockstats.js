@@ -18,13 +18,11 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
-  app.post('/api/stocks/whatif/:stksym/:stkdur', async (req, res) => {
-    console.log("made it to stockstats.js file....",req.body)
+  app.get('/api/stocks/whatif/:stksym/:stkind/:days/:profit', async (req, res) => {
     const fetch = require("node-fetch");
     let response
     try{
-      console.log("req",req.body)
-      await fetch(URL_HOST + 'pricetrends/whatif/' + req.params.stksym + '/' + req.params.stkdur, {method:'post', body:JSON.stringify(req.body), headers: { 'Content-Type': 'application/json' }})
+      await fetch(URL_HOST + 'pricetrends/whatif/' + req.params.stksym + '/' + req.params.stkind  + '/' + req.params.days  + '/' + req.params.profit)
       .then(res => res.json())
       .then(json => {response=json});
     }

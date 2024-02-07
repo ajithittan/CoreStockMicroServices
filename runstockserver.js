@@ -70,6 +70,7 @@ require('./routes/useroptions')(app,ensureAuthenticated);
 require('./routes/rssfeeds')(app);
 require('./routes/imageprocess')(app);
 require('./routes/stocknewsfeed')(app,ensureAuthenticated);
+require('./routes/stockextsectors')(app,ensureAuthenticated);
 require('./routes/googleauth')(app,passport)
 
 if (process.env.NODE_ENV === 'production') {
