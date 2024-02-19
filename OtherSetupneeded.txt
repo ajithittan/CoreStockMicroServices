@@ -29,6 +29,9 @@ curl http://127.0.0.1:5100/api/v2/sectors
 curl -X POST http://127.0.0.1:5100/api/v2/syncstkprices
 curl -X POST http://127.0.0.1:5100/api/v2/initiatepatternreg
 
+curl -X POST https://sarphira.com/api/v2/syncstkprices
+curl -X POST https://sarphira.com/api/v2/initiatepatternreg
+
 curl -X POST  -H "Content-Type: application/json" -d '{"stocks": ["CR11VS"]}' http://127.0.0.1:5400/api/processsubmsgs/updatestockprice
 
 curl --header "Content-Type: application/json"   --request POST   --data '{"username":"xyz","password":"xyz"}'   http://localhost:5100/api/stockquotes/bulk

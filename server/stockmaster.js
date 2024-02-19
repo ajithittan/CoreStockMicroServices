@@ -382,6 +382,21 @@ const getAllStockSectors= async () =>{
     return dbresponse
 }
 
+const getAllExtStockSectors = async () =>{
+
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var stocksector = models.stocksectorsexternal
+  try {
+        await stocksector.findAll({  
+        attributes: ['idstocksectorsexternal','sectorsymbol','symbol']
+      }).then(data => dbresponse=(data))
+    } catch (error) {
+      console.log("getAllExtStockSectors - Error",error)
+    }
+    return dbresponse
+}
+
  const createStockSectors = async (sector,userObj) =>{
   
   let retval = false
@@ -460,6 +475,11 @@ const getAllStockSectors= async () =>{
   return ([...stkSecs.map(item => item.stocks)].flat())
  }
 
+ const getAllExtSecStocksNormalized = async () =>{
+  let stkExtSecs = await getAllExtStockSectors()
+  return ([...stkExtSecs.map(item => item.symbol)].flat())
+ }
+
  const getAllPosStks = async () =>{
   var initModels = require("../models/init-models"); 
   var models = initModels(sequelize);
@@ -476,10 +496,11 @@ const getAllStockSectors= async () =>{
   
     let postks = await getAllPosStks()
     let secStks = await getAllSecStocksNormalized()
-    let setOfStks = new Set([...postks,...secStks])
+    let extSecStks = await getAllExtSecStocksNormalized()
+    let setOfStks = new Set([...postks,...secStks,...extSecStks])
 
     await publishMessage("STOCK_EOD_PRICES",{stocks:[...setOfStks]})
-    await publishMessage("STOCK_LATEST_SEC_DATA",{stocks:[...setOfStks]})
+    //await publishMessage("STOCK_LATEST_SEC_DATA",{stocks:[...setOfStks]})
     return true
 
  }
