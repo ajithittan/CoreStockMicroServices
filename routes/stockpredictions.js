@@ -105,4 +105,16 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
+  app.get('/api/patterns/all/:limitofpatterns', async (req, res) => {
+    const fetch = require("node-fetch");
+    let response = []
+    try{
+      const stkPatterns = require("../server/stockpatterns");
+      response = await stkPatterns.getAllStockPatterns(parseInt(req.params.limitofpatterns))
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
   }
