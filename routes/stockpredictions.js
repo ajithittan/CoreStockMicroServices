@@ -141,4 +141,28 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
+  app.get('/api/patterns/mostrecentday', async (req, res) => {
+    const fetch = require("node-fetch");
+    let response = []
+    try{
+      const stkPatterns = require("../server/stockpatterns");
+      response = await stkPatterns.getMostRecentPatternsForDay()
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
+  app.get('/api/patterns/recentstkpattern/:stksym/:limitdays', async (req, res) => {
+    const fetch = require("node-fetch");
+    let response = []
+    try{
+      const stkPatterns = require("../server/stockpatterns");
+      response = await stkPatterns.getRecentPatternsForAStock(req.params.stksym,parseInt(req.params.limitdays))
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
   }

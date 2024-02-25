@@ -21,7 +21,7 @@ const getAllStockPatterns = async (limitOfrecords) =>{
   }
   else{
     await stkPatterns.findAll({limit:limitOfrecords,order: [['idstockpatternsformed', 'DESC']]}).then(data => dbresponse=data) 
-    myCache.setCacheWithTtl("STOCK_PATTERNS_" + limitOfrecords,dbresponse,36000)  
+    myCache.setCacheWithTtl("STOCK_PATTERNS_" + limitOfrecords,dbresponse,6000)  
   }
   return dbresponse
 }
@@ -39,7 +39,7 @@ const getLatestDatesStockPatterns = async (limitdays) =>{
   }
   else{
     await stkPatterns.findAll({attributes:['date',[sequelize.fn('COUNT', sequelize.col('idstockpatternsformed')), 'patterncount']],group: ['date'],limit:limitdays,order: [['date', 'DESC']]}).then(data => dbresponse=data) 
-    myCache.setCacheWithTtl("LAST_DT_STK_PTRNS_" + limitdays,dbresponse,36000)  
+    myCache.setCacheWithTtl("LAST_DT_STK_PTRNS_" + limitdays,dbresponse,6000)  
   }
   return dbresponse
 }
@@ -63,4 +63,29 @@ const getStockPatternsByDate = async (inpdate) =>{
   return dbresponse
 }
 
-module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate};
+const getMostRecentPatternsForDay = async () =>{
+  console.log("in here to getMostRecentPatternsForDay")
+  let latestDates = await getAllStockPatterns(1)
+  return await getStockPatternsByDate(latestDates[0].date)
+}
+
+const getRecentPatternsForAStock =  async (stock,limitdays) =>{
+  let initModels = require("../models/init-models"); 
+  let models = initModels(sequelize);
+  let stkPatterns = models.stockpatternsformed
+  let dbresponse = []
+  let myCache = require('../servercache/cacheitems')
+  let cacheVal = myCache.getCache("PTRN_STK_" + stock + "_" + limitdays)
+
+  if (cacheVal){
+    dbresponse = cacheVal
+  }
+  else{
+    await stkPatterns.findAll({where: {symbol: {[Op.eq] : stock}},limit:limitdays,order: [['idstockpatternsformed', 'DESC']]}).then(data => dbresponse=data) 
+    myCache.setCacheWithTtl("PTRN_STK_" + stock + "_" + limitdays,dbresponse,6000)  
+  }
+  return dbresponse
+}
+
+module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate,getMostRecentPatternsForDay,
+                 getRecentPatternsForAStock};
