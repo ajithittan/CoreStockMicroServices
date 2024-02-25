@@ -60,7 +60,6 @@ const getStockPatternsByDate = async (inpdate) =>{
       date: {[Op.eq] : inpdate}},order: [['symbol', 'ASC']]}).then(data => dbresponse=data) 
       myCache.setCacheWithTtl("STK_PTRNS_DT" + inpdate,dbresponse,36000)  
   }
-  console.log("dbresponsedbresponsedbresponsedbresponsedbresponse",dbresponse)
   return dbresponse
 }
 
