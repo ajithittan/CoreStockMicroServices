@@ -26,4 +26,42 @@ const getAllStockPatterns = async (limitOfrecords) =>{
   return dbresponse
 }
 
-module.exports = {getAllStockPatterns};
+const getLatestDatesStockPatterns = async (limitdays) =>{
+  let initModels = require("../models/init-models"); 
+  let models = initModels(sequelize);
+  let stkPatterns = models.stockpatternsformed
+  let dbresponse = []
+  let myCache = require('../servercache/cacheitems')
+  let cacheVal = myCache.getCache("LAST_DT_STK_PTRNS_" + limitdays)
+
+  if (cacheVal){
+    dbresponse = cacheVal
+  }
+  else{
+    await stkPatterns.findAll({attributes:['date',[sequelize.fn('COUNT', sequelize.col('idstockpatternsformed')), 'patterncount']],group: ['date'],limit:limitdays,order: [['date', 'DESC']]}).then(data => dbresponse=data) 
+    myCache.setCacheWithTtl("LAST_DT_STK_PTRNS_" + limitdays,dbresponse,36000)  
+  }
+  return dbresponse
+}
+
+const getStockPatternsByDate = async (inpdate) =>{
+  let initModels = require("../models/init-models"); 
+  let models = initModels(sequelize);
+  let stkPatterns = models.stockpatternsformed
+  let dbresponse = []
+  let myCache = require('../servercache/cacheitems')
+  let cacheVal = myCache.getCache("STK_PTRNS_DT" + inpdate)
+
+  if (cacheVal){
+    dbresponse = cacheVal
+  }
+  else{
+    await stkPatterns.findAll({where: {
+      date: {[Op.eq] : inpdate}},order: [['symbol', 'ASC']]}).then(data => dbresponse=data) 
+      myCache.setCacheWithTtl("STK_PTRNS_DT" + inpdate,dbresponse,36000)  
+  }
+  console.log("dbresponsedbresponsedbresponsedbresponsedbresponse",dbresponse)
+  return dbresponse
+}
+
+module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate};
