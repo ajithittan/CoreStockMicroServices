@@ -87,5 +87,26 @@ const getRecentPatternsForAStock =  async (stock,limitdays) =>{
   return dbresponse
 }
 
+const gethistroicalpricefromDb = async (stksym,fromDt) =>{
+  let retData = []
+  var initModels = require("../models/init-models"); 
+  var models = initModels(sequelize);
+  var mdlStockprice = models.stockpriceday
+
+  await mdlStockprice.findAll({where: {
+        symbol: {
+            [Op.eq] : stksym
+        },
+        date: {
+          [Op.gte] : fromDt
+        }
+      },
+      order: [
+        ['date', 'ASC']
+    ]
+    }).then(data => retData=data)
+  return retData
+}
+
 module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate,getMostRecentPatternsForDay,
-                 getRecentPatternsForAStock};
+                 getRecentPatternsForAStock,gethistroicalpricefromDb};

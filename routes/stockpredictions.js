@@ -165,4 +165,16 @@ module.exports = (app) => {
     }
     return res.status(200).send(response);
   });
+  app.get('/api/patterns/performance/:stksym/:datefrom', async (req, res) => {
+    const fetch = require("node-fetch");
+    let response = []
+    try{
+      const stkPatterns = require("../server/stockpatterns");
+      response = await stkPatterns.gethistroicalpricefromDb(req.params.stksym,req.params.datefrom)
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response);
+  });
   }
