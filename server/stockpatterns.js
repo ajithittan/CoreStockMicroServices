@@ -21,7 +21,7 @@ const getAllStockPatterns = async (limitOfrecords) =>{
   }
   else{
     await stkPatterns.findAll({limit:limitOfrecords,order: [['idstockpatternsformed', 'DESC']]}).then(data => dbresponse=data) 
-    myCache.setCacheWithTtl("STOCK_PATTERNS_" + limitOfrecords,dbresponse,6000)  
+    myCache.setCacheWithTtl("STOCK_PATTERNS_" + limitOfrecords,dbresponse,3000)  
   }
   return dbresponse
 }
@@ -39,7 +39,7 @@ const getLatestDatesStockPatterns = async (limitdays) =>{
   }
   else{
     await stkPatterns.findAll({attributes:['date',[sequelize.fn('COUNT', sequelize.col('idstockpatternsformed')), 'patterncount']],group: ['date'],limit:limitdays,order: [['date', 'DESC']]}).then(data => dbresponse=data) 
-    myCache.setCacheWithTtl("LAST_DT_STK_PTRNS_" + limitdays,dbresponse,6000)  
+    myCache.setCacheWithTtl("LAST_DT_STK_PTRNS_" + limitdays,dbresponse,3000)  
   }
   return dbresponse
 }
@@ -58,7 +58,7 @@ const getStockPatternsByDate = async (inpdate) =>{
   else{
     await stkPatterns.findAll({where: {
       date: {[Op.eq] : inpdate}},order: [['symbol', 'ASC']]}).then(data => dbresponse=data) 
-      myCache.setCacheWithTtl("STK_PTRNS_DT" + inpdate,dbresponse,36000)  
+      myCache.setCacheWithTtl("STK_PTRNS_DT" + inpdate,dbresponse,3000)  
   }
   return dbresponse
 }
@@ -82,7 +82,7 @@ const getRecentPatternsForAStock =  async (stock,limitdays) =>{
   }
   else{
     await stkPatterns.findAll({where: {symbol: {[Op.eq] : stock}},limit:limitdays,order: [['idstockpatternsformed', 'DESC']]}).then(data => dbresponse=data) 
-    myCache.setCacheWithTtl("PTRN_STK_" + stock + "_" + limitdays,dbresponse,6000)  
+    myCache.setCacheWithTtl("PTRN_STK_" + stock + "_" + limitdays,dbresponse,3000)  
   }
   return dbresponse
 }
