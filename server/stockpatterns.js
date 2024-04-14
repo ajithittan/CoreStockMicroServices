@@ -64,7 +64,6 @@ const getStockPatternsByDate = async (inpdate) =>{
 }
 
 const getMostRecentPatternsForDay = async () =>{
-  console.log("in here to getMostRecentPatternsForDay")
   let latestDates = await getAllStockPatterns(1)
   return await getStockPatternsByDate(latestDates[0].date)
 }
@@ -108,5 +107,32 @@ const gethistroicalpricefromDb = async (stksym,fromDt) =>{
   return retData
 }
 
+const getStockPatternsCountByDate = async (limitdays) =>{
+    const moment = require("moment");
+    let initModels = require("../models/init-models"); 
+    let models = initModels(sequelize);
+    let stkPatterns = models.stockpatternsformed
+    let dbresponse = []
+    let myCache = require('../servercache/cacheitems')
+    let cacheVal = myCache.getCache("PTRN_STK_CNT" + limitdays)
+
+    if (cacheVal){
+      dbresponse = cacheVal
+    }
+    else{
+      await stkPatterns.findAll({
+            where: {date: {[Op.gte] : moment().subtract(limitdays, "days")}},
+            attributes: [
+              'symbol',
+              [sequelize.fn('COUNT', sequelize.col('date')), 'count'],
+            ],
+            group:["symbol"]
+          }
+        ).then(data => dbresponse=data) 
+      myCache.setCacheWithTtl("PTRN_STK_CNT" + limitdays,dbresponse,3000)  
+    }
+    return dbresponse  
+}
+
 module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate,getMostRecentPatternsForDay,
-                 getRecentPatternsForAStock,gethistroicalpricefromDb};
+                 getRecentPatternsForAStock,gethistroicalpricefromDb,getStockPatternsCountByDate};
