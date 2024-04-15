@@ -69,6 +69,7 @@ const getMostRecentPatternsForDay = async () =>{
 }
 
 const getRecentPatternsForAStock =  async (stock,limitdays) =>{
+  const moment = require("moment");
   let initModels = require("../models/init-models"); 
   let models = initModels(sequelize);
   let stkPatterns = models.stockpatternsformed
@@ -80,7 +81,9 @@ const getRecentPatternsForAStock =  async (stock,limitdays) =>{
     dbresponse = cacheVal
   }
   else{
-    await stkPatterns.findAll({where: {symbol: {[Op.eq] : stock}},limit:limitdays,order: [['idstockpatternsformed', 'DESC']]}).then(data => dbresponse=data) 
+    await stkPatterns.findAll({where: {symbol: {[Op.eq] : stock},
+      date: {[Op.gte] : moment().subtract(limitdays, "days")}},
+      order: [['idstockpatternsformed', 'DESC']]}).then(data => dbresponse=data) 
     myCache.setCacheWithTtl("PTRN_STK_" + stock + "_" + limitdays,dbresponse,3000)  
   }
   return dbresponse
