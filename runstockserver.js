@@ -55,10 +55,10 @@ const ensureAuthenticated = (req, res, next) => {
   else
     res.send(false)
 }
- 
+
 require('./routes/auth')(app,ensureAuthenticated);
 require('./routes/stocklist')(app,ensureAuthenticated);
-require('./routes/stockstats')(app);
+require('./routes/stockstats')(app,ensureAuthenticated);
 require('./routes/stockmaint')(app,ensureAuthenticated);
 require('./routes/stocksignal')(app,ensureAuthenticated);
 require('./routes/stocklistv2')(app,ensureAuthenticated);
