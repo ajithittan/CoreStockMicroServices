@@ -137,5 +137,25 @@ const getStockPatternsCountByDate = async (limitdays) =>{
     return dbresponse  
 }
 
+const formatCorrelationResp = (inpdata,formattype) =>{
+    if (formattype === "bubblecht"){
+      let formattedCorr = inpdata.map((item,indx) => {        
+        let retobj = {"category":indx}
+        for (var key in item) {
+          if (item.hasOwnProperty(key)) {
+            if (item[key] > process.env.MIN_CORRELATION_SCORE){
+              retobj[key] = item[key]
+            }
+          }
+        }   
+        return retobj
+      })
+      return formattedCorr
+    }else
+    {
+      return inpdata
+    }
+}
+
 module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate,getMostRecentPatternsForDay,
-                 getRecentPatternsForAStock,gethistroicalpricefromDb,getStockPatternsCountByDate};
+                 getRecentPatternsForAStock,gethistroicalpricefromDb,getStockPatternsCountByDate,formatCorrelationResp};
