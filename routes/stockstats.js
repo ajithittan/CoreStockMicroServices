@@ -58,4 +58,18 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(JSON.stringify(response))
   });
+  app.get('/api/corelation/sector/:stkdur/:sector/:format',ensureAuthenticated, async (req, res) => {
+    const fetch = require("node-fetch");
+    let respFormatter = require('../server/stockpatterns')
+    let response
+    try{
+      await fetch(URL_HOST + 'pricetrends/perchng/' + req.params.stkdur + '?stks=' + req.query.stks)
+      .then(res => res.json())
+      .then(json => {response=respFormatter.formatCorrelationResp(JSON.parse(json),req.params.format)});
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(JSON.stringify(response))
+  });
 }

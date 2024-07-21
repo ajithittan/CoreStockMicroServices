@@ -137,24 +137,48 @@ const getStockPatternsCountByDate = async (limitdays) =>{
     return dbresponse  
 }
 
-const formatCorrelationResp = (inpdata,formattype) =>{
-    if (formattype === "bubblecht"){
-      let formattedCorr = inpdata.map((item,indx) => {        
-        let retobj = {"category":indx}
-        for (var key in item) {
-          if (item.hasOwnProperty(key)) {
-            if (item[key] > process.env.MIN_CORRELATION_SCORE){
-              retobj[key] = item[key]
-            }
+const selectStocksThatFitCorrelate = (inpdata) =>{
+  const _= require("lodash")
+  let keys = []
+  let formattedCorr = inpdata.map((item,indx) => {
+    let retarr = []
+    let stks = []
+      for (var key in item) {
+        if (item.hasOwnProperty(key)) {
+          if (item[key] > process.env.MIN_CORRELATION_SCORE){
+            stks.push(key)
+            retarr.push({"stock":key,value:item[key].toFixed(3)})
           }
-        }   
-        return retobj
+        }
+      }   
+      if (keys.filter(eachKey => _.isEqual(eachKey,stks.sort())).length > 0) {
+        return []
+      } else{
+        keys.push(stks.sort())
+        return retarr.sort((a,b) => b.value - a.value)
+      }
+  })
+  return formattedCorr
+}
+
+const formatCorrelationResp = (inpdata,formattype) =>{
+  const _= require("lodash")
+  let formattedCorr = selectStocksThatFitCorrelate(inpdata)
+  formattedCorr = formattedCorr.sort(function(a,b){
+    return b.length - a.length;
+  }).slice(0,10)
+  if (formattype === "bubblecht"){
+    formattedCorr = formattedCorr.map((item,indx) => {
+      return item.map(eachitem =>{
+        return{...eachitem,category:indx}
       })
-      return formattedCorr
-    }else
-    {
-      return inpdata
-    }
+    })
+    console.log(formattedCorr.flat(1))
+    return formattedCorr.flat(1)
+  }else
+  {
+    return formattedCorr.filter(eachArr => eachArr.length > 0)
+  }
 }
 
 module.exports = {getAllStockPatterns,getLatestDatesStockPatterns,getStockPatternsByDate,getMostRecentPatternsForDay,
