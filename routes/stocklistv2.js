@@ -165,6 +165,17 @@ module.exports = (app,ensureAuthenticated) => {
         }
         return res.status(200).send(response);
       });
+      app.post('/api/v2/cacheprevclose', async (req, res) => {
+        var masterstkops = require('../server/stockmaster');
+        let response
+        try{
+          response = await masterstkops.initiateCachePrevClose()
+        }
+        catch (err){
+          console.log(err)
+        }
+        return res.status(200).send(response);
+      });
       app.post('/api/v2/initiatepatternreg', async (req, res) => {
         var masterstkops = require('../server/stockmaster');
         let response

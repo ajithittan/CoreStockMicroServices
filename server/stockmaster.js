@@ -515,6 +515,11 @@ const initiateEODStockPrice = async () =>{
   return true
 }
 
+const initiateCachePrevClose = async () =>{
+  await publishMessage("CACHE_PREV_CLOSE",{})
+  return true
+}
+
  const updStockPrices = async (arrofStks) =>{
 
     let responsefromextsite = await getStockHistDataMultiple([...arrofStks])
@@ -724,4 +729,4 @@ module.exports = {getStockSectors,stopTrackingStock,getstockquotes,getStockLists
                 updcdlpatternstrack,getAllIndicatorParams, flushAllCache,createStockSectors,deleteSector,updSectors,
                 savePositions,updateAllStockPrices,updStockPrices,deleteStkPositions,getValidityOfStock,
                 getCompanyDetails,getStockDetailsForList,getstockquotesformulstks,getUserDataForOps,getAllStocks,
-                initiateCaching,initiatePatternRecog,initiateEODStockPrice};
+                initiateCaching,initiatePatternRecog,initiateEODStockPrice,initiateCachePrevClose};
