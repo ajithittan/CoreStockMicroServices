@@ -274,7 +274,7 @@ const insertintostkprcday = async (arrofprices) => {
     await cdlpttrns.findAll().then(data => allcdlptrns=data) 
       //console.log('data getcdlpatterns',allcdlptrns)
     if (allcdlptrns !== ''){
-        let cacheset = myCache.setCacheWithTtl("ALL_CANDLE_PATTERNS",allcdlptrns,60000)
+        let cacheset = myCache.setCacheWithTtl("ALL_CANDLE_PATTERNS",allcdlptrns,600)
         //console.log("Cache was set in function getcdlpatterns...",cacheset)
     }  
   }  
@@ -720,7 +720,7 @@ const getAllStocks = async () =>{
   }else{
     console.log("Getting all stocks from DB - getAllStocks")
     await stkList.findAll({attributes: ['symbol','companyname']}).then(data => dbresponse=data).catch(err => console.log("ERROR - getAllStocks",err));
-    myCache.setCacheWithTtl("FULL_STOCK_LIST",dbresponse,3600)            
+    myCache.setCacheWithTtl("FULL_STOCK_LIST",dbresponse,600)            
   }         
   return(dbresponse)
  }

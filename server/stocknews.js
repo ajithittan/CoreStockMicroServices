@@ -25,7 +25,7 @@ const getStockNews = async (stkSym,limitOfNews) =>{
           console.log("finnhub failed so going to Bing News")
           newsResp = await getBingNews (stkSym)
         }
-        myCache.setCacheWithTtl("NEWS_STOCK_BING_" + stkSym,newsResp,3000)  
+        myCache.setCacheWithTtl("NEWS_STOCK_BING_" + stkSym,newsResp,600)  
       }
       return newsResp.slice(0,limitOfNews)
 }
@@ -111,7 +111,7 @@ const getNameToBuildQuery = async (stkSym) =>{
         [Op.eq] : stkSym
       }
     }}).then(data => dbresponse=data) 
-    myCache.setCacheWithTtl("STOCK_DEFINITION_" + stkSym,dbresponse,60000)  
+    myCache.setCacheWithTtl("STOCK_DEFINITION_" + stkSym,dbresponse,600)  
   }
 
   return `"${dbresponse[0].title}"`

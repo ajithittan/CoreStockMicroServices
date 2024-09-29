@@ -89,7 +89,7 @@ module.exports = (app,ensureAuthenticated) => {
       }
       if (req.params.stkLast){
         response = JSON.parse(response).pop()
-        myCache.setCacheWithTtl(cacheKey,response,36000) 
+        myCache.setCacheWithTtl(cacheKey,response,600) 
         return res.status(200).send(response)
       }else{
         return res.status(200).send(response)
@@ -203,7 +203,7 @@ module.exports = (app,ensureAuthenticated) => {
         if (response.message){
           throw 'Error from backend';
         }else{
-          myCache.setCacheWithTtl(cacheKey,response,36000)
+          myCache.setCacheWithTtl(cacheKey,response,600)
         }
       }
       else{

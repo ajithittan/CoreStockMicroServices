@@ -31,7 +31,7 @@ module.exports = (app,ensureAuthenticated) => {
           + req.params.rollup + '/' + req.params.unit + '/' + req.params.byType)
             .then(res => res.json())
             .then(json => {response=json});
-          myCache.setCacheWithTtl(cacheKey,response,36000)   
+          myCache.setCacheWithTtl(cacheKey,response,600)   
         }else{
           console.log("found in cache - per changes - ",cacheKey)
         }  
