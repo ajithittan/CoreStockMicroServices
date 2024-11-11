@@ -96,7 +96,7 @@ module.exports = (app,ensureAuthenticated) => {
       }  
     }
     catch (err){
-      console.log("error in err api/stocksignals/indicators",err)
+      console.log("error in err api/stocksignals/indicators",req.params.stksym,err)
       return res.status(200).send([])
     }
   });
@@ -232,5 +232,19 @@ module.exports = (app,ensureAuthenticated) => {
       console.log(err)
     }
     return res.status(200).send(({symbol:req.params.stksym, type:"SAR",data:response}))
+  });
+  app.post('/api/stocksignals/searchdataset', ensureAuthenticated, async (req, res) => {
+    let response = []
+    try{
+      const fetch = require("node-fetch");
+      await fetch(URL_HOST + 'pricetrends/searchdataset', 
+      {method:'post', body:JSON.stringify(req.body), 
+      headers: { 'Content-Type': 'application/json' }}).then(res => res.json())
+      .then(json => {response=JSON.parse(json)});
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response)
   });
 }
