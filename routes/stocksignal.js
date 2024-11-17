@@ -247,4 +247,17 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(response)
   });
+  app.get('/api/stocksignals/parsesearchtext', ensureAuthenticated, async (req, res) => {
+    let response = []
+    try{
+      const fetch = require("node-fetch");
+      await fetch(URL_HOST + 'pricetrends/extractintent' + '?parsesearch=' + req.query.parsetext)
+      .then(res => res.json())
+      .then(json => response=json);
+    }
+    catch (err){
+      console.log(err)
+    }
+    return res.status(200).send(response)
+  });
 }
