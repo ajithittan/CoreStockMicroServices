@@ -236,11 +236,8 @@ module.exports = (app,ensureAuthenticated) => {
   app.post('/api/stocksignals/searchdataset', ensureAuthenticated, async (req, res) => {
     let response = []
     try{
-      const fetch = require("node-fetch");
-      await fetch(URL_HOST + 'pricetrends/searchdataset', 
-      {method:'post', body:JSON.stringify(req.body), 
-      headers: { 'Content-Type': 'application/json' }}).then(res => res.json())
-      .then(json => {response=JSON.parse(json)});
+      const stkSrch = require("../server/stockSearch");
+      response = await stkSrch.searchDataSet(req.body)
     }
     catch (err){
       console.log(err)
