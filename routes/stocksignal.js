@@ -3,6 +3,11 @@ const urlconf = new URLConfig()
 const URL_HOST = urlconf.HOST
 
 module.exports = (app,ensureAuthenticated) => {
+  const SSE_RESPONSE_HEADER = {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive'
+  };
   app.get('/api/stocksignals/perf/:stkstgyid/:stkdur/:stksym', async (req, res) => {
     try{
       const fetch = require("node-fetch");
@@ -233,6 +238,31 @@ module.exports = (app,ensureAuthenticated) => {
     }
     return res.status(200).send(({symbol:req.params.stksym, type:"SAR",data:response}))
   });
+  app.get('/api/stocksignals/searchdataset',ensureAuthenticated, async (req, res) => {
+    try{
+      const writeResponseToClient = async () =>{
+        let response
+        const stkSrch = require("../server/stockSearch");
+        console.log(req.query.query)
+        response = await stkSrch.searchDataSet(JSON.parse(req.query.query))
+        //response = await respFormatter.formatCorrelationResp(JSON.parse(response),req.params.format)  
+        res.write('event: message' + "\n");
+        res.write('data' + ":" + JSON.stringify(response) + "\n\n");  
+        res.flush();  
+      }
+      res.writeHead(200, SSE_RESPONSE_HEADER);
+      writeResponseToClient()
+      let intOfWrites = setInterval(async () => writeResponseToClient() , 30000);        
+        req.on('close', () => {
+          clearInterval(intOfWrites)
+          console.log('Connection to client closed.');
+        res.end();
+      });                
+    }
+    catch (err){
+      console.log(err)
+  }});
+  /***
   app.post('/api/stocksignals/searchdataset', ensureAuthenticated, async (req, res) => {
     let response = []
     try{
@@ -243,7 +273,7 @@ module.exports = (app,ensureAuthenticated) => {
       console.log(err)
     }
     return res.status(200).send(response)
-  });
+  }); */
   app.get('/api/stocksignals/parsesearchtext', ensureAuthenticated, async (req, res) => {
     let response = []
     try{
