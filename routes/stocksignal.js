@@ -240,11 +240,14 @@ module.exports = (app,ensureAuthenticated) => {
   });
   app.get('/api/stocksignals/searchdataset',ensureAuthenticated, async (req, res) => {
     try{
+      let intOfWrites = 0
+      let refreshinsecs = parseInt(req.query.refreshsecs)
       const writeResponseToClient = async () =>{
         let response
         const stkSrch = require("../server/stockSearch");
         console.log(req.query.query)
-        response = await stkSrch.searchDataSet(JSON.parse(req.query.query))
+        console.log(req.query.refreshsecs)
+        response = await stkSrch.searchDataSet(JSON.parse(req.query.query)) 
         //response = await respFormatter.formatCorrelationResp(JSON.parse(response),req.params.format)  
         res.write('event: message' + "\n");
         res.write('data' + ":" + JSON.stringify(response) + "\n\n");  
@@ -252,8 +255,10 @@ module.exports = (app,ensureAuthenticated) => {
       }
       res.writeHead(200, SSE_RESPONSE_HEADER);
       writeResponseToClient()
-      let intOfWrites = setInterval(async () => writeResponseToClient() , 30000);        
-        req.on('close', () => {
+      if (refreshinsecs > 0) {
+        intOfWrites = setInterval(async () => writeResponseToClient() , refreshinsecs);
+      }        
+      req.on('close', () => {
           clearInterval(intOfWrites)
           console.log('Connection to client closed.');
         res.end();
